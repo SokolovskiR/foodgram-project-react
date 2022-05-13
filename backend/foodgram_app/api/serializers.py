@@ -8,3 +8,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
+
+    #### to be implemented###
+    # add is_subscribed field
