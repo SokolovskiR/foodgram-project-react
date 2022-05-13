@@ -103,7 +103,7 @@ class IngredientAmount(CustomBaseModel):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='%(app_label)s_%(class)s_ingredient_amounts'
+        related_name='ingredient_amounts'
     )
     amount = models.PositiveIntegerField(
         verbose_name='Количество'
@@ -131,8 +131,14 @@ class Recipe(CustomBaseModel):
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления в минутах'
     )
-    ingredients = models.ManyToManyField(IngredientAmount)
-    tags = models.ManyToManyField(Tag)
+    ingredients = models.ManyToManyField(
+        IngredientAmount,
+        related_name='recipe_ingredients'
+    )
+    tags = models.ManyToManyField(
+        Tag,
+        related_name='recipe_tags'
+    )
 
     class Meta:
         ordering = ['-date_modified']
@@ -150,12 +156,14 @@ class FavouriteList(CustomBaseModel):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='%(app_label)s_%(class)s_favourites'
+        related_name='favourite_recipes',
+        verbose_name='Рецепт'
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(app_label)s_%(class)s_fav_users'
+        related_name='favourite_users',
+        verbose_name='Пользователь'
     )
 
     class Meta:
@@ -183,13 +191,13 @@ class Subscription(CustomBaseModel):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(app_label)s_%(class)s_follower',
+        related_name='follower',
         verbose_name='Подписчик'
     )
     following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(app_label)s_%(class)s_following',
+        related_name='following',
         verbose_name='Автор публикаций'
     )
 

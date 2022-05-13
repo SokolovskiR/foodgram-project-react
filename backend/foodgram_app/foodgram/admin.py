@@ -72,23 +72,32 @@ class RecipeAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
         'pk',
         'name',
         'author',
-        'get_ingredients',
         'get_tags',
-        'last_editor',
-        'date_created',
-        'date_modified'
+        'get_favourite_add_count',
+        'date_created'
     )
-    search_fields = ('name', 'author', 'get_tags', 'get_ingredients')
+    search_fields = (
+        'name', 'author__username', 'author__last_name',
+        'tags__name'
+    )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('ingredients', 'tags')
-
-    def get_ingredients(self, obj):
-        return ','.join([i.name for i in obj.ingredients.all()])
+        return qs.prefetch_related('tags')
     
     def get_tags(self, obj):
-        return ','.join([t.name for t in obj.tags.all()])
+        return ', '.join([str(t.name) for t in obj.tags.all()])
+    
+    def get_favourite_add_count(self, obj):
+        return FavouriteList.objects.filter(
+            recipe_id=obj.id
+            ).count()
+
+    get_tags.short_description = 'Теги'
+    get_favourite_add_count.short_description = (
+        'Счетчик добавления в избранное'
+    )
+
 
 
 
@@ -119,4 +128,7 @@ class SubscriptionAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
         'following',
         'date_modified'
     )
-    search_fields = ('user', 'following')
+    search_fields = (
+        'user__username', 'user__last_name',
+        'following__username', 'following__last_name'
+    )
