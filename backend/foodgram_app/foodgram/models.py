@@ -1,6 +1,12 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
+
+
+MIN_ING_AMOUNT = 1
+MIN_COOK_TIME = 1
+MAX_NAME_LENGTH = 200
+MAX_UNIT_LENGTH = 200
 
 
 User = get_user_model()
@@ -11,7 +17,7 @@ class CustomBaseModel(models.Model):
 
     name = models.CharField(
         verbose_name='Название',
-        max_length=100,
+        max_length=MAX_NAME_LENGTH,
         unique=True
     )
     date_created = models.DateTimeField(
@@ -78,7 +84,7 @@ class Ingredient(CustomBaseModel):
 
     measurement_unit = models.CharField(
         verbose_name='Единица измерения',
-        max_length=20
+        max_length=MAX_UNIT_LENGTH
     )
 
     class Meta:
@@ -96,28 +102,6 @@ class Ingredient(CustomBaseModel):
         return f'{self.name} [{self.measurement_unit}]'
 
 
-class IngredientAmount(CustomBaseModel):
-    """Model to match ingredient to amounts for a recipe."""
-
-    name = None
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        related_name='ingredient_amounts'
-    )
-    amount = models.PositiveIntegerField(
-        verbose_name='Количество'
-    )
-
-    class Meta:
-        ordering = ['ingredient']
-        verbose_name = 'Количество ингредиента'
-        verbose_name_plural = 'Количество ингредиентов'
-
-    def __str__(self):
-        return f'{self.ingredient} - {self.amount}'
-
-
 class Recipe(CustomBaseModel):
     """Model for recipes."""
 
@@ -129,11 +113,12 @@ class Recipe(CustomBaseModel):
         upload_to='recipes/'
     )
     cooking_time = models.PositiveIntegerField(
-        verbose_name='Время приготовления в минутах'
-    )
-    ingredients = models.ManyToManyField(
-        IngredientAmount,
-        related_name='recipe_ingredients'
+        verbose_name='Время приготовления в минутах',
+        validators=[
+            MinValueValidator(MIN_COOK_TIME, 
+            f'время приготовления должно быть не менее {MIN_COOK_TIME} мин.'
+            )
+        ]
     )
     tags = models.ManyToManyField(
         Tag,
@@ -149,51 +134,83 @@ class Recipe(CustomBaseModel):
         return f'{self.name} - {self.author}'
 
 
-class FavouriteList(CustomBaseModel):
-    """Recipes for favourite list."""
+class IngredientAmount(models.Model):
+    """Model to match ingredient to amounts for a recipe."""
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredient_amount_recipes',
+        verbose_name='Рецепт'
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredient_amounts',
+        verbose_name='Ингредиент'
+    )
+    amount = models.PositiveIntegerField(
+        verbose_name='Количество',
+        validators=[
+            MinValueValidator(MIN_ING_AMOUNT, 
+            f'укажите количество не менее {MIN_ING_AMOUNT}'
+            )
+        ]
+    )
+
+    class Meta:
+        ordering = ['ingredient']
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
+
+    def __str__(self):
+        return f'{self.recipe.name} - {self.ingredient} {self.amount}'
+
+
+class GeneralListBaseModel(CustomBaseModel):
+    """General model for shopping and favourite lists."""
 
     name = None
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favourite_recipes',
+        related_name='%(app_label)s_%(class)s_recipes',
         verbose_name='Рецепт'
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favourite_users',
+        related_name='%(app_label)s_%(class)s_users',
         verbose_name='Пользователь'
     )
 
     class Meta:
-        ordering = ['-date_created']
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранное'
+        abstract = True
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favourite'
-            )
+                fields=['content_type', 'object_id', 'user', 'recipe'], 
+                name='%(app_label)s_%(class)s_user_recipe_unique'
+            ),
         ]
 
     def __str__(self):
         return f'{self.user} - {self.recipe} - {self.date_created}'
 
 
-class ShoppingList(FavouriteList):
+class FavouriteList(GeneralListBaseModel):
+    """Recipes for favourite list."""
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+
+
+class ShoppingList(GeneralListBaseModel):
     """Recipes for shopping list."""
 
     class Meta:
-        ordering = ['-date_created']
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_shopping_item'
-            )
-        ]
 
 
 class Subscription(CustomBaseModel):
@@ -210,7 +227,7 @@ class Subscription(CustomBaseModel):
         User,
         on_delete=models.CASCADE,
         related_name='following',
-        verbose_name='Автор публикаций'
+        verbose_name='Автор рецептов'
     )
 
     class Meta:

@@ -6,6 +6,14 @@ from .models import (
 )
 
 
+class IngredientInLine(admin.StackedInline):
+    """Inlines to add multiple ingredients to a recipe."""
+
+    model = IngredientAmount
+    extra = 0
+    min_num = 1
+
+
 class SaveAuthorEditorMixin:
     """
     Mixin to auto save author and editor to each model.
@@ -53,16 +61,15 @@ class IngredientAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 
 
 @admin.register(IngredientAmount)
-class IngredientAmountAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
+class IngredientAmountAdmin(admin.ModelAdmin):
     """IngredientAmounts administration."""
     list_display = (
         'pk',
+        'recipe',
         'ingredient',
-        'amount',
-        'last_editor',
-        'date_modified'
+        'amount'
     )
-    search_fields = ('ingredient__name',)
+    search_fields = ('ingredient__name', 'recipe__name')
 
 
 @admin.register(Recipe)
@@ -80,6 +87,7 @@ class RecipeAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
         'name', 'author__username', 'author__last_name',
         'tags__name'
     )
+    inlines = [IngredientInLine]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -95,10 +103,8 @@ class RecipeAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 
     get_tags.short_description = 'Теги'
     get_favourite_add_count.short_description = (
-        'Счетчик добавления в избранное'
+        'Добавлений в избранное'
     )
-
-
 
 
 @admin.register(FavouriteList)
