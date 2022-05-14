@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import User
-from foodgram.models import Subscription
+from foodgram.models import Subscription, Tag, Ingredient
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -23,4 +23,20 @@ class CustomUserSerializer(serializers.ModelSerializer):
             ).first():
             return True
         return False
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """Serializer for tags."""
+
+    class Meta:
+        model = Tag
+        fields = ('id', 'name', 'color', 'slug')
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Serializer for ingredients."""
+
+    class Meta:
+        model = Ingredient
+        fields = ('id', 'name', 'measurement_unit')
 
