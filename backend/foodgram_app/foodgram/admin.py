@@ -40,7 +40,7 @@ class TagAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
-        'color_hexcode',
+        'color',
         'slug',
         'last_editor',
         'date_modified'

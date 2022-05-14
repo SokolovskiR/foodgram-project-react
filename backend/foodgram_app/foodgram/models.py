@@ -54,7 +54,7 @@ class CustomBaseModel(models.Model):
 class Tag(CustomBaseModel):
     """Model for tags."""
 
-    color_hexcode = models.CharField(
+    color = models.CharField(
         verbose_name='Цветовой HEX-код',
         validators=[
             RegexValidator(
@@ -76,7 +76,7 @@ class Tag(CustomBaseModel):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return f'{self.name} - {self.slug} - {self.color_hexcode}'
+        return f'{self.name} - {self.slug} - {self.color}'
 
 
 class Ingredient(CustomBaseModel):
