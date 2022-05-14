@@ -40,3 +40,8 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """Serializer for subscribtions."""
+
+    
