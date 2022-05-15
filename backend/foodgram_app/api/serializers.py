@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers
 
+from foodgram.models import IngredientAmount
 from users.models import User
 from foodgram.models import (
     Subscription, Tag, Ingredient,
@@ -80,9 +81,43 @@ class FavouriteListSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
 
+    tags = TagSerializer(many=True)
+
+    ingredients = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'author')
+        fields = (
+            'id', 'tags', 'author',
+            'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name',
+            'image', 'text', 'cooking_time'
+        )
+    
+
+    def get_ingredients(self, obj):
+        return IngredientAmount.objects.filter(
+            recipe=obj
+            ).select_related('recipe').values(
+                'id', 'recipe__name', 'recipe__measurement_unit', 'amount'
+            )
+
+    def get_is_favorited(self, obj):
+        return 'PLACEHOLDER'
+    
+    def get_is_in_shopping_cart(self, obj):
+        return 'PLACEHOLDER'
+
+
+
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     data['tags']
+
+
+    #     return data
     
 
     
