@@ -63,7 +63,7 @@ class Tag(CustomBaseModel):
             )
         ],
         unique=True,
-        max_length=10
+        max_length=7
     )
     slug = models.SlugField(
         verbose_name='Читаемое представление тега (слаг)',

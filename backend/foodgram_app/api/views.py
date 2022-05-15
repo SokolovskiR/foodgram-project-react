@@ -4,12 +4,25 @@ from django.shortcuts import get_object_or_404
 
 from core.permissions import AuthorAdminOrReadOnly
 from foodgram.models import (
-    Tag, Ingredient, FavouriteList
+    Tag, Ingredient, FavouriteList,
+    Recipe
 )
 from .serializers import (
     TagSerializer, IngredientSerializer,
-    FavouriteListSerializer
+    FavouriteListSerializer, RecipeSerializer
 )
+
+
+class AutoAddAuthorEditorMixin:
+    """Mixin to add author/editor automatically on create/update."""
+
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(author=user, last_editor=user)
+    
+    def perform_update(self, serializer):
+        user = self.request.user
+        serializer.save(last_editor=user)
 
 
 class TagViewSet(
@@ -34,8 +47,8 @@ class IngredientViewSet(
     queryset = Ingredient.objects.all()
 
 
-
 class FavouriteListViewSet(
+    AutoAddAuthorEditorMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
@@ -56,5 +69,21 @@ class FavouriteListViewSet(
         return Response(
             {'errors': 'этого рецепта нет в избранном'},
             status=status.HTTP_400_BAD_REQUEST
-            
         )
+    
+    def create(self, request, *args, **kwargs):
+        recipe = get_object_or_404(Recipe, id=kwargs.get('recipe_id'))
+        if request.user.foodgram_favouritelist_users.filter(recipe=recipe).exists():
+            return Response(
+                {'errors': 'Этот рецепт уже в списке избранного!'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return super().create(request, *args, **kwargs)
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    """Vieset for recipes."""
+
+    serializer_class = RecipeSerializer
+    permission_classes = [AuthorAdminOrReadOnly]
+    queryset = Recipe.objects.select_related()

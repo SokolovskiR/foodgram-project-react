@@ -66,31 +66,29 @@ class FavouriteListSerializer(serializers.ModelSerializer):
         data['cooking_time'] = recipe.cooking_time
         return data
     
-    def validate(self, data):
+    def create(self, validated_data):
         recipe_id = self.context.get(
             'request'
         ).parser_context.get('kwargs').get('recipe_id')
         recipe = get_object_or_404(Recipe, id=recipe_id)
         user = self.context['request'].user
-        if self.context['request'].method == 'POST':
-            if user.foodgram_favouritelist_users.filter(recipe=recipe).exists():
-                raise serializers.ValidationError(
-                    'Этот рецепт уже в списке избранного!'
-                )
-            ###test###    
-            data['author_id'] = user.id
-            data['last_editor_id'] = user.id
-        elif self.context['request'].method == 'DELETE':
-            if not user.foodgram_favouritelist_users.filter(recipe=recipe).exists():
-                raise serializers.ValidationError(
-                    'Этого рецепта нет в списке избранного!'
-                )
-        data['recipe_id'] = recipe_id
-        data['user_id'] = user.id
-        return data
-    
-    def create(self, validated_data):
+        validated_data['recipe'] = recipe
+        validated_data['user'] = user
         return super().create(validated_data)
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    """Serializer for recipes."""
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'author')
+    
+
+    
+
+
+
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

@@ -3,7 +3,8 @@ from django.urls import path, include
 from rest_framework import routers
 from djoser.views import TokenCreateView, TokenDestroyView
 from .views import (
-    TagViewSet, IngredientViewSet, FavouriteListViewSet
+    TagViewSet, IngredientViewSet, FavouriteListViewSet,
+    RecipeViewSet
 )
 
 router = routers.DefaultRouter()
@@ -14,13 +15,7 @@ router.register(
     FavouriteListViewSet,
     basename='favourite_list'
 )
-
-# router.register(
-#     r'recipes/favorite',
-#     FavouriteListViewSet,
-#     basename='favourite_list'
-# )
-
+router.register('recipes', RecipeViewSet, basename='recipes')
 
 
 urlpatterns = [
