@@ -112,7 +112,7 @@ class FavouriteListAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
     """Favourite recipes list administration."""
     list_display = (
         'pk',
-        'author',
+        'user',
         'recipe',
         'date_modified'
     )

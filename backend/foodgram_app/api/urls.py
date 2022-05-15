@@ -2,12 +2,25 @@ from django.urls import path, include
 
 from rest_framework import routers
 from djoser.views import TokenCreateView, TokenDestroyView
-from .views import TagViewSet, IngredientViewSet
-
+from .views import (
+    TagViewSet, IngredientViewSet, FavouriteListViewSet
+)
 
 router = routers.DefaultRouter()
 router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register(
+    r'recipes/(?P<recipe_id>\d+)/favorite',
+    FavouriteListViewSet,
+    basename='favourite_list'
+)
+
+# router.register(
+#     r'recipes/favorite',
+#     FavouriteListViewSet,
+#     basename='favourite_list'
+# )
+
 
 
 urlpatterns = [
