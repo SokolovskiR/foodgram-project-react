@@ -81,7 +81,7 @@ class FavouriteListViewSet(
         return super().create(request, *args, **kwargs)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
     """Vieset for recipes."""
 
     serializer_class = RecipeSerializer

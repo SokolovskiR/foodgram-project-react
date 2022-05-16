@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.db.models import F
+import base64, uuid
+from django.core.files.base import ContentFile
 
 from rest_framework import serializers
 
@@ -9,6 +11,15 @@ from foodgram.models import (
     Subscription, Tag, Ingredient,
     FavouriteList, ShoppingList, Recipe
 )
+
+
+class CommonActionsMixin:
+    """Common serializer actions mixin."""
+
+    def get_absolute_url(self, url):
+        """Generate absolute url path for image file."""
+        request = self.context.get('request')
+        return request.build_absolute_uri(url)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -38,7 +49,7 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
-
+    
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Serializer for ingredients."""
@@ -48,7 +59,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class FavouriteListSerializer(serializers.ModelSerializer):
+class FavouriteListSerializer(CommonActionsMixin, serializers.ModelSerializer):
     """Serializer for list of favourite recipes."""
 
     class Meta:
@@ -62,9 +73,7 @@ class FavouriteListSerializer(serializers.ModelSerializer):
         ).parser_context.get('kwargs').get('recipe_id')
         recipe = get_object_or_404(Recipe, id=recipe_id)
         data['name'] = recipe.name
-        data['image'] = self.context.get(
-            'request'
-            ).build_absolute_uri(recipe.image.url)
+        data['image'] = self.get_absolute_url(recipe.image.url)
         data['cooking_time'] = recipe.cooking_time
         return data
     
@@ -79,14 +88,34 @@ class FavouriteListSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+class Base64ImageField(CommonActionsMixin, serializers.ImageField):
+    """Custom field to to convert Base64 image string to file."""
+
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            id = uuid.uuid4()
+            data = ContentFile(
+                base64.b64decode(imgstr),
+                name = id.urn[9:] + '.' + ext
+            )
+        return super(Base64ImageField, self).to_internal_value(data)
+    
+    def to_representation(self, value):
+        return self.get_absolute_url(value.url)
+
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
 
     tags = TagSerializer(many=True)
     ingredients = serializers.SerializerMethodField()
-    author = CustomUserSerializer()
+    author = CustomUserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -121,10 +150,17 @@ class RecipeSerializer(serializers.ModelSerializer):
             ).exists():
             return True
         return False
-
-
     
+    def validate(self, attrs):
+        print(attrs)
+        return super().validate(attrs)
 
+    def create(self, validated_data):
+        print(validated_data)
+        # validated_data['author'] = self.context['request'].user
+        # tags = validated_data.pop('tags')
+        # print(tags)
+        return super().create(validated_data)
     
 
 
