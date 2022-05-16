@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404
+from django.db.models import F
 
 from rest_framework import serializers
 
@@ -82,8 +83,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
 
     tags = TagSerializer(many=True)
-
     ingredients = serializers.SerializerMethodField()
+    author = CustomUserSerializer()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -95,29 +96,33 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_in_shopping_cart', 'name',
             'image', 'text', 'cooking_time'
         )
-    
+
 
     def get_ingredients(self, obj):
         return IngredientAmount.objects.filter(
             recipe=obj
-            ).select_related('recipe').values(
-                'id', 'recipe__name', 'recipe__measurement_unit', 'amount'
+            ).values(
+                'id', 'amount', name=F('ingredient__name'),
+                measurement_unit=F('ingredient__measurement_unit')
             )
 
     def get_is_favorited(self, obj):
-        return 'PLACEHOLDER'
+        if FavouriteList.objects.filter(
+            user=self.context['request'].user,
+            recipe_id=obj.id
+            ).exists():
+            return True
+        return False
     
     def get_is_in_shopping_cart(self, obj):
-        return 'PLACEHOLDER'
+        if ShoppingList.objects.filter(
+            user=self.context['request'].user,
+            recipe_id=obj.id
+            ).exists():
+            return True
+        return False
 
 
-
-    # def to_representation(self, instance):
-    #     data = super().to_representation(instance)
-    #     data['tags']
-
-
-    #     return data
     
 
     
