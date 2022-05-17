@@ -114,7 +114,7 @@ class Base64ImageField(CommonActionsMixin, serializers.ImageField):
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
 
-    tags = TagSerializer(many=True)
+    tags = TagSerializer(many=True, read_only=True)
     ingredients = serializers.SerializerMethodField()
     author = CustomUserSerializer(read_only=True)
     is_favorited = serializers.SerializerMethodField()
@@ -131,13 +131,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-    # def get_ingredients(self, obj):
-    #     return IngredientAmount.objects.filter(
-    #         recipe=obj
-    #         ).values(
-    #             'id', 'amount', name=F('ingredient__name'),
-    #             measurement_unit=F('ingredient__measurement_unit')
-    #         )
+    def get_ingredients(self, obj):
+        return IngredientAmount.objects.filter(
+            recipe=obj
+            ).values(
+                'id', 'amount', name=F('ingredient__name'),
+                measurement_unit=F('ingredient__measurement_unit')
+            )
 
     def get_is_favorited(self, obj):
         if FavouriteList.objects.filter(
@@ -155,27 +155,35 @@ class RecipeSerializer(serializers.ModelSerializer):
             return True
         return False
     
-    def validate(self, attrs):
+    # def validate(self, attrs):
 
-        # ingredients = self.initial_data.get('ingredients')
-        # tags = self.initial_data.get('tags')
-        print(self.data)
+    #     ingredients = self.initial_data.get('ingredients')
+    #     tags = self.initial_data.get('tags')
 
-    def validate_tags(self, value):
-        print(value)
-        return value
+    #     self.data['tags'] = tags
+    #     self.data['ingredients'] = ingredients
 
+    def validate_tags(self):
+        pass
 
-        return super().validate(attrs)
+    def validate_ingredients(self):
+        pass
+
     
 
     def create(self, validated_data):
+        #print(validated_data)
+        # print(self.initial_data)
+
+        self.val
+
+        ingredients = self.initial_data.get('ingredients')
+        tags = self.initial_data.get('tags')
+
+        validated_data['tags'] = tags
+
         print(validated_data)
-        # validated_data['author'] = self.context['request'].user
-        # tags = validated_data.pop('tags')
-        # print(tags)
-        
-        print(self.initial_data)
+
 
         return super().create(validated_data)
     
