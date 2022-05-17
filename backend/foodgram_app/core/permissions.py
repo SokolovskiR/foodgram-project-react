@@ -17,7 +17,6 @@ class AuthorAdminOrReadOnly(permissions.BasePermission):
         if request.user.is_anonymous:
             return False
         return (
-            obj.user == request.user or 
             request.user.is_superuser or 
             obj.author == request.user
         )

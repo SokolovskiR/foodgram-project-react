@@ -36,6 +36,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
+        if user.is_anonymous:
+            return False
         if Subscription.objects.filter(
             following=obj, user=user
             ).first():
@@ -107,6 +109,8 @@ class Base64ImageField(CommonActionsMixin, serializers.ImageField):
 
 
 
+    
+
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes."""
 
@@ -127,13 +131,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-    def get_ingredients(self, obj):
-        return IngredientAmount.objects.filter(
-            recipe=obj
-            ).values(
-                'id', 'amount', name=F('ingredient__name'),
-                measurement_unit=F('ingredient__measurement_unit')
-            )
+    # def get_ingredients(self, obj):
+    #     return IngredientAmount.objects.filter(
+    #         recipe=obj
+    #         ).values(
+    #             'id', 'amount', name=F('ingredient__name'),
+    #             measurement_unit=F('ingredient__measurement_unit')
+    #         )
 
     def get_is_favorited(self, obj):
         if FavouriteList.objects.filter(
@@ -152,14 +156,27 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
     
     def validate(self, attrs):
-        print(attrs)
+
+        # ingredients = self.initial_data.get('ingredients')
+        # tags = self.initial_data.get('tags')
+        print(self.data)
+
+    def validate_tags(self, value):
+        print(value)
+        return value
+
+
         return super().validate(attrs)
+    
 
     def create(self, validated_data):
         print(validated_data)
         # validated_data['author'] = self.context['request'].user
         # tags = validated_data.pop('tags')
         # print(tags)
+        
+        print(self.initial_data)
+
         return super().create(validated_data)
     
 

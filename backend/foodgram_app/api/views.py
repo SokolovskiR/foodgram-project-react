@@ -1,5 +1,6 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 
 from core.permissions import AuthorAdminOrReadOnly
@@ -45,6 +46,7 @@ class IngredientViewSet(
 
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
+    permission_classes = [AllowAny]
 
 
 class FavouriteListViewSet(
@@ -87,3 +89,15 @@ class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = [AuthorAdminOrReadOnly]
     queryset = Recipe.objects.select_related()
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = RecipeSerializer(data=request.data)
+    #     return super().create(request, *args, **kwargs)
+
+
+    
+
+
+    
+    
+
