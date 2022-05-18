@@ -22,6 +22,24 @@ class CommonActionsMixin:
         return request.build_absolute_uri(url)
 
 
+class Base64ImageField(CommonActionsMixin, serializers.ImageField):
+    """Custom field to to convert Base64 image string to file."""
+
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            id = uuid.uuid4()
+            data = ContentFile(
+                base64.b64decode(imgstr),
+                name = id.urn[9:] + '.' + ext
+            )
+        return super(Base64ImageField, self).to_internal_value(data)
+    
+    def to_representation(self, value):
+        return self.get_absolute_url(value.url)
+
+
 class CustomUserSerializer(serializers.ModelSerializer):
     """Serializer for users."""
 
@@ -61,6 +79,92 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
+class IngredientAmountSerializer(serializers.ModelSerializer):
+    """Serializer for ingredient amounts."""
+    id = serializers.ReadOnlyField(source='ingredient.id')
+    name = serializers.ReadOnlyField(source='ingredient.name')
+    measurement_unit = serializers.ReadOnlyField(
+        
+        source='ingredient.measurement_unit'
+    )
+
+    class Meta:
+        model = IngredientAmount
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    """Serializer for recipes."""
+
+    image = Base64ImageField()
+    tags = TagSerializer(many=True, read_only=True)
+    author = CustomUserSerializer(read_only=True)
+    ingredients = IngredientAmountSerializer(
+        many=True,
+        read_only=True,
+        source='ingredientamount_set'
+    )
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id', 'tags', 'author',
+            'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name',
+            'image', 'text', 'cooking_time'
+        )
+
+
+    # def get_ingredients(self, obj):
+    #     return IngredientAmount.objects.filter(
+    #         recipe=obj
+    #         ).values(
+    #             'id', 'amount', name=F('ingredient__name'),
+    #             measurement_unit=F('ingredient__measurement_unit')
+    #         )
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        if FavouriteList.objects.filter(
+            user=self.context['request'].user,
+            recipe_id=obj.id
+            ).exists():
+            return True
+        return False
+    
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        if ShoppingList.objects.filter(
+            user=self.context['request'].user,
+            recipe_id=obj.id
+            ).exists():
+            return True
+        return False
+
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        new_recipe = super().create(validated_data)
+        # new_recipe = Recipe.objects.create(**validated_data)
+        new_recipe.tags.add(*tags)
+        ingredient_amounts_to_create = []
+        for ing in ingredients:
+            ingredient_amounts_to_create.append(
+                IngredientAmount(recipe=new_recipe, **dict(ing))
+            )
+        ing_amount_create = IngredientAmount.objects.bulk_create(
+            ingredient_amounts_to_create
+        )
+        return new_recipe
+
+
+
 class FavouriteListSerializer(CommonActionsMixin, serializers.ModelSerializer):
     """Serializer for list of favourite recipes."""
 
@@ -88,126 +192,6 @@ class FavouriteListSerializer(CommonActionsMixin, serializers.ModelSerializer):
         validated_data['recipe'] = recipe
         validated_data['user'] = user
         return super().create(validated_data)
-
-
-class Base64ImageField(CommonActionsMixin, serializers.ImageField):
-    """Custom field to to convert Base64 image string to file."""
-
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            id = uuid.uuid4()
-            data = ContentFile(
-                base64.b64decode(imgstr),
-                name = id.urn[9:] + '.' + ext
-            )
-        return super(Base64ImageField, self).to_internal_value(data)
-    
-    def to_representation(self, value):
-        return self.get_absolute_url(value.url)
-
-
-class RecipeRetrieveDeleteSerializer(serializers.ModelSerializer):
-    """Serializer for retrieving recipes."""
-
-    tags = TagSerializer(many=True, read_only=True)
-    ingredients = serializers.SerializerMethodField()
-    author = CustomUserSerializer(read_only=True)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
-    image = Base64ImageField()
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id', 'tags', 'author',
-            'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name',
-            'image', 'text', 'cooking_time'
-        )
-
-
-    def get_ingredients(self, obj):
-        return IngredientAmount.objects.filter(
-            recipe=obj
-            ).values(
-                'id', 'amount', name=F('ingredient__name'),
-                measurement_unit=F('ingredient__measurement_unit')
-            )
-
-    def get_is_favorited(self, obj):
-        if FavouriteList.objects.filter(
-            user=self.context['request'].user,
-            recipe_id=obj.id
-            ).exists():
-            return True
-        return False
-    
-    def get_is_in_shopping_cart(self, obj):
-        if ShoppingList.objects.filter(
-            user=self.context['request'].user,
-            recipe_id=obj.id
-            ).exists():
-            return True
-        return False
-    
-
-class IngredienAmounttSerializer(serializers.ModelSerializer):
-    """Serializer for ingredient amounts."""
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all(),
-        source='ingredient'
-    )
-
-    class Meta:
-        model = IngredientAmount
-        fields = ('id', 'amount')
-
-
-class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for creating/updating recipes."""
-
-    author = CustomUserSerializer(read_only=True)
-    image = Base64ImageField()
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all()
-    )
-    ingredients = IngredienAmounttSerializer(many=True)
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'tags', 'author', 'ingredients', 'name',
-            'image', 'text', 'cooking_time'
-        )
-    
-    def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
-        new_recipe = Recipe.objects.create(**validated_data)
-        new_recipe.tags.add(*tags)
-
-        ingredient_amounts_to_create = []
-        for ing in ingredients:
-            ingredient_amounts_to_create.append(
-                IngredientAmount(recipe=new_recipe, **dict(ing))
-            )
-        print(ingredient_amounts_to_create)
-
-        ing_amount_create = IngredientAmount.objects.bulk_create(
-            ingredient_amounts_to_create
-        )
-
-        print(ing_amount_create)
-
-        # print(ingredients)
-
-    
-
-
-
-
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

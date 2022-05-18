@@ -29,6 +29,10 @@ class SaveAuthorEditorMixin:
         super().save_model(request, obj, form, change)
     
     def get_readonly_fields(self, request, obj=None):
+        """
+        Automatically save author and editor when creating instance,
+        but allow to edit these fields when updating.
+        """
         if obj:
             return tuple()
         return ('author', 'last_editor')
@@ -91,7 +95,7 @@ class RecipeAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.prefetch_related('tags')
+        return qs.prefetch_related('tags', 'ingredients')
     
     def get_tags(self, obj):
         return ', '.join([str(t.name) for t in obj.tags.all()])

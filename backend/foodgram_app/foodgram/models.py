@@ -115,14 +115,22 @@ class Recipe(CustomBaseModel):
     cooking_time = models.PositiveIntegerField(
         verbose_name='Время приготовления в минутах',
         validators=[
-            MinValueValidator(MIN_COOK_TIME, 
-            f'время приготовления должно быть не менее {MIN_COOK_TIME} мин.'
+            MinValueValidator(
+                MIN_COOK_TIME, 
+                f'минимальное время приготовления {MIN_COOK_TIME} мин.'
             )
         ]
     )
     tags = models.ManyToManyField(
         Tag,
+        verbose_name='Теги',
         related_name='recipe_tags'
+    )
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='IngredientAmount',
+        verbose_name='Ингредиенты',
+        related_name='recipe_ingredients'
     )
 
     class Meta:

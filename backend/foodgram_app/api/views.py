@@ -10,8 +10,7 @@ from foodgram.models import (
 )
 from .serializers import (
     TagSerializer, IngredientSerializer,
-    FavouriteListSerializer, RecipeRetrieveDeleteSerializer,
-    RecipeCreateUpdateSerializer
+    FavouriteListSerializer, RecipeSerializer
 )
 
 
@@ -36,6 +35,7 @@ class TagViewSet(
 
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
+    permission_classes = [AllowAny]
 
 
 class IngredientViewSet(
@@ -87,12 +87,7 @@ class FavouriteListViewSet(
 class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
     """Vieset for recipes."""
 
+    serializer_class = RecipeSerializer
     permission_classes = [AuthorAdminOrReadOnly]
     queryset = Recipe.objects.select_related()
-
-    def get_serializer_class(self):
-        if self.action in ['update', 'create']:
-            return RecipeCreateUpdateSerializer
-        return RecipeRetrieveDeleteSerializer
-
 
