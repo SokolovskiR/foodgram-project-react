@@ -108,11 +108,8 @@ class Base64ImageField(CommonActionsMixin, serializers.ImageField):
         return self.get_absolute_url(value.url)
 
 
-
-    
-
-class RecipeSerializer(serializers.ModelSerializer):
-    """Serializer for recipes."""
+class RecipeRetrieveDeleteSerializer(serializers.ModelSerializer):
+    """Serializer for retrieving recipes."""
 
     tags = TagSerializer(many=True, read_only=True)
     ingredients = serializers.SerializerMethodField()
@@ -155,38 +152,59 @@ class RecipeSerializer(serializers.ModelSerializer):
             return True
         return False
     
-    # def validate(self, attrs):
 
-    #     ingredients = self.initial_data.get('ingredients')
-    #     tags = self.initial_data.get('tags')
+class IngredienAmounttSerializer(serializers.ModelSerializer):
+    """Serializer for ingredient amounts."""
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=Ingredient.objects.all(),
+        source='ingredient'
+    )
 
-    #     self.data['tags'] = tags
-    #     self.data['ingredients'] = ingredients
+    class Meta:
+        model = IngredientAmount
+        fields = ('id', 'amount')
 
-    def validate_tags(self):
-        pass
 
-    def validate_ingredients(self):
-        pass
+class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for creating/updating recipes."""
 
+    author = CustomUserSerializer(read_only=True)
+    image = Base64ImageField()
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
+    ingredients = IngredienAmounttSerializer(many=True)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'tags', 'author', 'ingredients', 'name',
+            'image', 'text', 'cooking_time'
+        )
     
-
     def create(self, validated_data):
-        #print(validated_data)
-        # print(self.initial_data)
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        new_recipe = Recipe.objects.create(**validated_data)
+        new_recipe.tags.add(*tags)
 
-        self.val
+        ingredient_amounts_to_create = []
+        for ing in ingredients:
+            ingredient_amounts_to_create.append(
+                IngredientAmount(recipe=new_recipe, **dict(ing))
+            )
+        print(ingredient_amounts_to_create)
 
-        ingredients = self.initial_data.get('ingredients')
-        tags = self.initial_data.get('tags')
+        ing_amount_create = IngredientAmount.objects.bulk_create(
+            ingredient_amounts_to_create
+        )
 
-        validated_data['tags'] = tags
+        print(ing_amount_create)
 
-        print(validated_data)
+        # print(ingredients)
 
-
-        return super().create(validated_data)
     
+
 
 
 
