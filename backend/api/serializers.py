@@ -81,11 +81,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class IngredientAmountSerializer(serializers.ModelSerializer):
     """Serializer for ingredient amounts."""
-    id = serializers.ReadOnlyField(source='ingredient.id')
-    name = serializers.ReadOnlyField(source='ingredient.name')
+    name = serializers.ReadOnlyField(source='ingredient.name', read_only=True)
     measurement_unit = serializers.ReadOnlyField(
-        
-        source='ingredient.measurement_unit'
+        source='ingredient.measurement_unit',
+        read_only=True
     )
 
     class Meta:
@@ -99,11 +98,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = IngredientAmountSerializer(
-        many=True,
-        read_only=True,
-        source='ingredientamount_set'
-    )
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -117,35 +112,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-    # def get_ingredients(self, obj):
-    #     return IngredientAmount.objects.filter(
-    #         recipe=obj
-    #         ).values(
-    #             'id', 'amount', name=F('ingredient__name'),
-    #             measurement_unit=F('ingredient__measurement_unit')
-    #         )
+    def get_ingredients(self, obj):
+        qs = obj.ingredients.all()
+        print(qs)
+        return IngredientAmountSerializer(qs, many=True).data
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        if FavouriteList.objects.filter(
-            user=self.context['request'].user,
-            recipe_id=obj.id
-            ).exists():
-            return True
-        return False
+        return FavouriteList.objects.filter(
+            user=user, recipe_id=obj.id
+            ).exists()
     
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        if ShoppingList.objects.filter(
-            user=self.context['request'].user,
-            recipe_id=obj.id
-            ).exists():
-            return True
-        return False
+        return ShoppingList.objects.filter(
+            user=user, recipe_id=obj.id
+            ).exists()
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
