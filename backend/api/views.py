@@ -1,6 +1,6 @@
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 
 from core.permissions import AuthorAdminOrReadOnly
@@ -10,7 +10,8 @@ from foodgram.models import (
 )
 from .serializers import (
     TagSerializer, IngredientSerializer,
-    FavouriteListSerializer, RecipeSerializer
+    FavouriteListSerializer, SubscriptionSerializer,
+    RecipeSerializer
 )
 
 
@@ -82,6 +83,50 @@ class FavouriteListViewSet(
                 status=status.HTTP_400_BAD_REQUEST
             )
         return super().create(request, *args, **kwargs)
+
+
+class SubscriptionListShowViewSet(
+    AutoAddAuthorEditorMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+    
+):
+    """Viewset for showing subscription list."""
+
+    serializer_class = SubscriptionSerializer
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    
+
+    def get_queryset(self):
+        return self.request.user.following.all()
+
+    
+
+
+
+
+
+    # def delete(self, request, recipe_id):
+    #     favourite_entry = FavouriteList.objects.filter(
+    #         recipe_id=recipe_id, user=request.user
+    #     ).first()
+    #     if favourite_entry:
+    #         favourite_entry.delete()
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
+    #     return Response(
+    #         {'errors': 'этого рецепта нет в избранном'},
+    #         status=status.HTTP_400_BAD_REQUEST
+    #     )
+    
+    # def create(self, request, *args, **kwargs):
+    #     recipe = get_object_or_404(Recipe, id=kwargs.get('recipe_id'))
+    #     if request.user.foodgram_favouritelist_users.filter(recipe=recipe).exists():
+    #         return Response(
+    #             {'errors': 'Этот рецепт уже в списке избранного!'},
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
+    #     return super().create(request, *args, **kwargs)
 
 
 class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):

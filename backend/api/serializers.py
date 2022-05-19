@@ -98,7 +98,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    # ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientAmountSerializer(
+        many=True,
+        read_only=True,
+    )
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -112,10 +116,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
 
-    def get_ingredients(self, obj):
-        qs = obj.ingredients.all()
-        print(qs)
-        return IngredientAmountSerializer(qs, many=True).data
+    # def get_ingredients(self, obj):
+    #     qs = obj.ingredients.all()
+    #     return IngredientAmountSerializer(qs, many=True).data
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
@@ -183,6 +186,35 @@ class FavouriteListSerializer(CommonActionsMixin, serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Serializer for subscribtions."""
 
-    pass
+    id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+
+    class Meta:
+        model = Subscription
+        fields = (
+            'id', 'email', 'username', 'first_name',
+            'last_name', 'is_subscribed', 'recipes',
+            'recipes_count'
+        )
+
+    def get_recipes_count(self, obj):
+        user =  self.context['request'].user
+        return user.foodgram_recipe_authors.count()
+    
+    def get_recipes(self, obj):
+        user =  self.context['request'].user
+        return user.foodgram_recipe_authors.all()
+    
+    def get_is_subscribed(self, obj):
+        return Subscription.objects.filter(
+            user=obj.user, author=obj.author
+        ).exists()
 
     
