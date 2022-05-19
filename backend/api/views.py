@@ -6,12 +6,12 @@ from django.shortcuts import get_object_or_404
 from core.permissions import AuthorAdminOrReadOnly
 from foodgram.models import (
     Tag, Ingredient, FavouriteList,
-    Recipe
+    Recipe, IngredientAmount
 )
 from .serializers import (
     TagSerializer, IngredientSerializer,
     FavouriteListSerializer, SubscriptionSerializer,
-    RecipeSerializer
+    RecipeSerializer, IngredientAmountSerializer
 )
 
 
@@ -48,6 +48,18 @@ class IngredientViewSet(
 
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
+    permission_classes = [AllowAny]
+
+
+class IngredientAmountViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    """Viewset to retrieve ingredients with amounts."""
+
+    serializer_class = IngredientAmountSerializer
+    queryset = IngredientAmount.objects.all()
     permission_classes = [AllowAny]
 
 
@@ -94,8 +106,7 @@ class SubscriptionListShowViewSet(
     """Viewset for showing subscription list."""
 
     serializer_class = SubscriptionSerializer
-    # permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
 
     def get_queryset(self):

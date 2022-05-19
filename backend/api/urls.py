@@ -4,7 +4,7 @@ from rest_framework import routers
 from djoser.views import TokenCreateView, TokenDestroyView
 from .views import (
     TagViewSet, IngredientViewSet, FavouriteListViewSet,
-    RecipeViewSet, SubscriptionListShowViewSet
+    RecipeViewSet, SubscriptionListShowViewSet, IngredientAmountViewSet
 )
 
 router = routers.DefaultRouter()
@@ -16,10 +16,13 @@ router.register(
     basename='favourite_list'
 )
 router.register(
-    'test',
+    'users/subscriptions',
     SubscriptionListShowViewSet,
     basename='subscriptions_show'
 )
+
+router.register('ingamounts', IngredientAmountViewSet, basename='ing_amounts')
+
 router.register('recipes', RecipeViewSet, basename='recipes')
 
 
