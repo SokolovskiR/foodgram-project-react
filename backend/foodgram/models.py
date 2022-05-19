@@ -130,7 +130,7 @@ class Recipe(CustomBaseModel):
         Ingredient,
         through='IngredientAmount',
         verbose_name='Ингредиенты',
-        related_name='recipe_ingredients'
+        related_name='ingredients'
     )
 
     class Meta:
