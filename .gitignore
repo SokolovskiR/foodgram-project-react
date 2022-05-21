@@ -132,4 +132,4 @@ dmypy.json
 .idea
 
 # Django media folder for dev
-backend/foodgram_app/media/
+backend/media/
