@@ -69,6 +69,7 @@ class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
 
 class FavouriteListViewSet(
     AutoAddAuthorEditorMixin,
+    mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
@@ -93,7 +94,8 @@ class FavouriteListViewSet(
     
     def create(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, id=kwargs.get('recipe_id'))
-        if request.user.foodgram_favouritelist_users.filter(recipe=recipe).exists():
+        if request.user.foodgram_favouritelist_users.filter(
+            recipe=recipe).exists():
             return Response(
                 {'errors': 'Этот рецепт уже в списке избранного!'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -101,13 +103,15 @@ class FavouriteListViewSet(
         return super().create(request, *args, **kwargs)
 
 
-class SubscriptionListShowViewSet(
+class SubscriptionListViewSet(
     AutoAddAuthorEditorMixin,
     mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
     viewsets.GenericViewSet
     
 ):
-    """Viewset for showing subscription list."""
+    """Viewset for subscription list."""
 
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]
@@ -117,32 +121,3 @@ class SubscriptionListShowViewSet(
         return self.request.user.following.all()
 
     
-
-
-
-
-
-    # def delete(self, request, recipe_id):
-    #     favourite_entry = FavouriteList.objects.filter(
-    #         recipe_id=recipe_id, user=request.user
-    #     ).first()
-    #     if favourite_entry:
-    #         favourite_entry.delete()
-    #         return Response(status=status.HTTP_204_NO_CONTENT)
-    #     return Response(
-    #         {'errors': 'этого рецепта нет в избранном'},
-    #         status=status.HTTP_400_BAD_REQUEST
-    #     )
-    
-    # def create(self, request, *args, **kwargs):
-    #     recipe = get_object_or_404(Recipe, id=kwargs.get('recipe_id'))
-    #     if request.user.foodgram_favouritelist_users.filter(recipe=recipe).exists():
-    #         return Response(
-    #             {'errors': 'Этот рецепт уже в списке избранного!'},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-    #     return super().create(request, *args, **kwargs)
-
-
-
-

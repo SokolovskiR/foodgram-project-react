@@ -12,16 +12,7 @@ from foodgram.models import (
 )
 
 
-class CommonActionsMixin:
-    """Common serializer actions mixin."""
-
-    def get_absolute_url(self, url):
-        """Generate absolute url path for image file."""
-        request = self.context.get('request')
-        return request.build_absolute_uri(url)
-
-
-class Base64ImageField(CommonActionsMixin, serializers.ImageField):
+class Base64ImageField(serializers.ImageField):
     """
     Custom field to convert Base64 image string to file,
     when saving to database.
@@ -39,7 +30,7 @@ class Base64ImageField(CommonActionsMixin, serializers.ImageField):
         return super(Base64ImageField, self).to_internal_value(data)
     
     def to_representation(self, value):
-        return self.get_absolute_url(value.url)
+        return self.context.get('request').build_absolute_uri(value.url)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -96,7 +87,6 @@ class IngredientAmountShowSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-
 class RecipeReadOnlySerializer(serializers.ModelSerializer):
     """Read only recipe serializer."""
     
@@ -106,6 +96,7 @@ class RecipeReadOnlySerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
         read_only_fields = ('id', 'name', 'image', 'cooking_time')
+    
 
 
 class RecipeViewSerializer(serializers.ModelSerializer):
@@ -252,7 +243,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             }).data
 
 
-class FavouriteListSerializer(CommonActionsMixin, serializers.ModelSerializer):
+class FavouriteListSerializer(serializers.ModelSerializer):
     """Serializer for list of favourite recipes."""
 
     class Meta:
@@ -261,12 +252,11 @@ class FavouriteListSerializer(CommonActionsMixin, serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        recipe_id = self.context.get(
-            'request'
-        ).parser_context.get('kwargs').get('recipe_id')
+        request = self.context.get('request')
+        recipe_id = request.parser_context.get('kwargs').get('recipe_id')
         recipe = get_object_or_404(Recipe, id=recipe_id)
         data['name'] = recipe.name
-        data['image'] = self.get_absolute_url(recipe.image.url)
+        data['image'] = request.build_absolute_uri(recipe.image.url)
         data['cooking_time'] = recipe.cooking_time
         return data
     
@@ -303,12 +293,18 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes_count(self, obj):
-        user =  self.context['request'].user
-        return user.foodgram_recipe_authors.count()
+        return self.context['request'].user.foodgram_recipe_authors.count()
     
     def get_recipes(self, obj):
-        user =  self.context['request'].user
-        return user.foodgram_recipe_authors.all()
+        request = self.context.get('request')
+        user = request.user
+        recipes_limit = request.query_params.get('recipes_limit')
+        qs = user.foodgram_recipe_authors.all()
+        if recipes_limit:
+            qs = qs[:recipes_limit]
+        return RecipeReadOnlySerializer(
+            qs, many=True, context=self.context
+            ).data
     
     def get_is_subscribed(self, obj):
         return Subscription.objects.filter(
