@@ -1,10 +1,15 @@
 from django.contrib import admin
 
+from import_export.admin import ImportExportModelAdmin
+from .resources import (
+    IngredientAmountResource, IngredientResource, IngredientAmount,
+    RecipeResource, SubscriptionResource, FavouriteResource, TagResource,
+    ShoppingResource
+)
 from .models import (
     Tag, Ingredient, IngredientAmount,
     Recipe, FavouriteList, ShoppingList, Subscription
 )
-
 
 class IngredientInLine(admin.StackedInline):
     """Inlines to add multiple ingredients to a recipe."""
@@ -39,8 +44,9 @@ class SaveAuthorEditorMixin:
 
 
 @admin.register(Tag)
-class TagAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
+class TagAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Tags administration."""
+    resource_class = TagResource
     list_display = (
         'pk',
         'name',
@@ -53,8 +59,9 @@ class TagAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 
 
 @admin.register(Ingredient)
-class IngredientAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
+class IngredientAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Ingredients administration."""
+    resource_class = IngredientResource
     list_display = (
         'pk',
         'name',
@@ -65,8 +72,9 @@ class IngredientAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 
 
 @admin.register(IngredientAmount)
-class IngredientAmountAdmin(admin.ModelAdmin):
+class IngredientAmountAdmin(ImportExportModelAdmin):
     """IngredientAmounts administration."""
+    resource_class = IngredientAmountResource
     list_display = (
         'pk',
         'recipe',
@@ -77,8 +85,9 @@ class IngredientAmountAdmin(admin.ModelAdmin):
 
 
 @admin.register(Recipe)
-class RecipeAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
+class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Recipes administration."""
+    resource_class = RecipeResource
     list_display = (
         'pk',
         'name',
@@ -112,8 +121,9 @@ class RecipeAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 
 
 @admin.register(FavouriteList)
-class FavouriteListAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
+class FavouriteListAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Favourite recipes list administration."""
+    resource_class = FavouriteResource
     list_display = (
         'pk',
         'user',
@@ -126,12 +136,13 @@ class FavouriteListAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
 @admin.register(ShoppingList)
 class ShoppingListAdmin(FavouriteListAdmin):
     """Shopping list administration."""
-    pass
+    resource_class = ShoppingResource
 
 
 @admin.register(Subscription)
-class SubscriptionAdmin(SaveAuthorEditorMixin, admin.ModelAdmin):
+class SubscriptionAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Subscriptions administration."""
+    resource_class = SubscriptionResource
     list_display = (
         'pk',
         'user',
