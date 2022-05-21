@@ -6,12 +6,13 @@ from django.shortcuts import get_object_or_404
 from core.permissions import AuthorAdminOrReadOnly
 from foodgram.models import (
     Tag, Ingredient, FavouriteList,
-    Recipe, IngredientAmount
+    Recipe
 )
+from .fitlers import RecipeFilter, IngredientFilter
 from .serializers import (
-    TagSerializer, IngredientSerializer,
+    RecipeCreateUpdateSerializer, TagSerializer, IngredientSerializer,
     FavouriteListSerializer, SubscriptionSerializer,
-    RecipeSerializer, IngredientAmountSerializer
+    RecipeViewSerializer
 )
 
 
@@ -49,18 +50,21 @@ class IngredientViewSet(
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
     permission_classes = [AllowAny]
+    filterset_class = IngredientFilter
 
 
-class IngredientAmountViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    """Viewset to retrieve ingredients with amounts."""
+class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
+    """Vieset for recipes."""
 
-    serializer_class = IngredientAmountSerializer
-    queryset = IngredientAmount.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [AuthorAdminOrReadOnly]
+    queryset = Recipe.objects.all()
+    filterset_class = RecipeFilter
+    
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeViewSerializer
+        return RecipeCreateUpdateSerializer
 
 
 class FavouriteListViewSet(
@@ -140,10 +144,5 @@ class SubscriptionListShowViewSet(
     #     return super().create(request, *args, **kwargs)
 
 
-class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
-    """Vieset for recipes."""
 
-    serializer_class = RecipeSerializer
-    permission_classes = [AuthorAdminOrReadOnly]
-    queryset = Recipe.objects.select_related()
 
