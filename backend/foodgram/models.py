@@ -1,7 +1,6 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator, MinValueValidator
-
+from django.core.validators import MinValueValidator, RegexValidator
+from django.db import models
 
 MIN_ING_AMOUNT = 1
 MIN_COOK_TIME = 1

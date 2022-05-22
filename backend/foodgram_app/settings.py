@@ -9,9 +9,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -60,28 +57,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram_app.wsgi.application'
 
-
-# for development server
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR + '/' + 'db.sqlite3',
     }
 }
-
-# for production
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv('DB_ENGINE'),
-#         'NAME': os.getenv('DB_NAME'),
-#         'USER': os.getenv('POSTGRES_USER'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('DB_HOST'),
-#         'PORT': os.getenv('DB_PORT')
-#     }
-# }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -97,7 +78,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 
 LANGUAGE_CODE = 'ru-ru'

@@ -1,15 +1,13 @@
 from django.contrib import admin
-
 from import_export.admin import ImportExportModelAdmin
-from .resources import (
-    IngredientAmountResource, IngredientResource, IngredientAmount,
-    RecipeResource, SubscriptionResource, FavouriteResource, TagResource,
-    ShoppingResource
-)
-from .models import (
-    Tag, Ingredient, IngredientAmount,
-    Recipe, FavouriteList, ShoppingList, Subscription
-)
+
+from .models import (FavouriteList, Ingredient, IngredientAmount, Recipe,
+                     ShoppingList, Subscription, Tag)
+from .resources import (FavouriteResource, IngredientAmount,
+                        IngredientAmountResource, IngredientResource,
+                        RecipeResource, ShoppingResource, SubscriptionResource,
+                        TagResource)
+
 
 class IngredientInLine(admin.StackedInline):
     """Inlines to add multiple ingredients to a recipe."""

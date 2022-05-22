@@ -1,10 +1,10 @@
-from django.urls import path, include
-
-from rest_framework import routers
+from django.urls import include, path
 from djoser.views import TokenCreateView, TokenDestroyView
+from rest_framework import routers
+
 from .views import (
-    TagViewSet, IngredientViewSet, FavouriteListViewSet,
-    RecipeViewSet, SubscriptionListViewSet, ShoppingListViewSet
+    FavouriteListViewSet, IngredientViewSet, RecipeViewSet,
+    ShoppingListViewSet, SubscriptionListViewSet, TagViewSet
 )
 
 router = routers.DefaultRouter()

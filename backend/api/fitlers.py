@@ -1,6 +1,6 @@
 from django_filters import FilterSet, filters
 
-from foodgram.models import Recipe, Ingredient
+from foodgram.models import Ingredient, Recipe
 
 
 class IngredientFilter(FilterSet):
@@ -29,17 +29,15 @@ class RecipeFilter(FilterSet):
         fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
 
     def get_is_favorited(self, queryset, name, value):
-        if self.request.user.is_anonymous or not value:
-            return Recipe.objects.all()
-        if value:
+        if value and not self.request.user.is_anonymous:
             return Recipe.objects.filter(
                 foodgram_favouritelist_recipes__user=self.request.user
             )
+        return Recipe.objects.all()
 
     def get_is_in_shopping_cart(self, queryset, name, value):
-        if self.request.user.is_anonymous or not value:
-            return Recipe.objects.all()
-        if value:
+        if value and not self.request.user.is_anonymous:
             return Recipe.objects.filter(
                 foodgram_shoppinglist_recipes__user=self.request.user
             )
+        return Recipe.objects.all()

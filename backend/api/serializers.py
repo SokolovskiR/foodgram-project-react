@@ -1,15 +1,15 @@
-from django.shortcuts import get_object_or_404
-import base64, uuid
-from django.core.files.base import ContentFile
+import base64
+import uuid
 
+from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from foodgram.models import IngredientAmount
-from users.models import User
 from foodgram.models import (
-    Subscription, Tag, Ingredient,
-    FavouriteList, ShoppingList, Recipe
+    FavouriteList, Ingredient, IngredientAmount,
+    Recipe, ShoppingList, Subscription, Tag
 )
+from users.models import User
 
 
 class Base64ImageField(serializers.ImageField):

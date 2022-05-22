@@ -1,23 +1,20 @@
-from rest_framework import viewsets, mixins, status
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from django.http import HttpResponse
 from django.db.models import Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from rest_framework import mixins, status, viewsets
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 
 from core.permissions import AuthorAdminOrReadOnly
-from foodgram.models import (
-    Tag, Ingredient,Recipe, Subscription,
-    IngredientAmount
-)
-from .fitlers import RecipeFilter, IngredientFilter
-from .serializers import (
-    RecipeCreateUpdateSerializer, TagSerializer,
-    IngredientSerializer, FavouriteListSerializer, 
-    SubscriptionSerializer, RecipeViewSerializer,
-    ShoppingListSerializer
-)
+from foodgram.models import (Ingredient, IngredientAmount, Recipe,
+                             Subscription, Tag)
+
+from .fitlers import IngredientFilter, RecipeFilter
+from .serializers import (FavouriteListSerializer, IngredientSerializer,
+                          RecipeCreateUpdateSerializer, RecipeViewSerializer,
+                          ShoppingListSerializer, SubscriptionSerializer,
+                          TagSerializer)
 
 User = get_user_model()
 

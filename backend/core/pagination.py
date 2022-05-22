@@ -1,5 +1,6 @@
 from rest_framework import pagination
 
+
 class GeneralCustomPagination(pagination.PageNumberPagination):
     """General paginator for most endpoints."""
     page_size = 6
