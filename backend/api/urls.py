@@ -12,14 +12,6 @@ router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngredientViewSet, basename='ingredients')
 router.register('recipes', RecipeViewSet, basename='recipes')
 
-
-# router.register(
-#     r'recipes/(?P<recipe_id>\d+)/favorite',
-#     FavouriteListViewSet,
-#     basename='favourite_list'
-# )
-
-
 urlpatterns = [
     path('users/subscriptions/', SubscriptionListViewSet.as_view(
         {'get': 'list'}
@@ -28,6 +20,11 @@ urlpatterns = [
         SubscriptionListViewSet.as_view(
             {'post': 'create', 'delete': 'destroy'}
             ), name='subscribe'
+        ),
+    path('recipes/<int:recipe_id>/favorite',
+        FavouriteListViewSet.as_view(
+            {'post': 'create', 'delete': 'destroy'}
+            ), name='favourite'
         ),
     path('', include('djoser.urls')),
     path('auth/token/login/', TokenCreateView.as_view(), name='token_obtain'),

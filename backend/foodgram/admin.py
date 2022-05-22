@@ -128,9 +128,9 @@ class FavouriteListAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         'pk',
         'user',
         'recipe',
-        'date_modified'
+        'date_created'
     )
-    search_fields = ('author', 'recipe')
+    search_fields = ('user__username', 'recipe__name')
 
 
 @admin.register(ShoppingList)

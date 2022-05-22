@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
+from rest_framework.decorators import action
 
 
 from core.permissions import AuthorAdminOrReadOnly
@@ -72,22 +73,19 @@ class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
         return RecipeCreateUpdateSerializer
 
 
-class FavouriteListViewSet(
-    AutoAddAuthorEditorMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-    
-):
+class FavouriteListViewSet(viewsets.ModelViewSet):
     """Viewset for recipes favourite list."""
 
     serializer_class = FavouriteListSerializer
     permission_classes = [AuthorAdminOrReadOnly]
+    lookup_field = 'recipe_id'
 
-    def delete(self, request, recipe_id):
-        favourite_entry = FavouriteList.objects.filter(
-            recipe_id=recipe_id, user=request.user
+    def get_queryset(self):
+        return self.request.user.foodgram_favouritelist_users.all()
+
+    def destroy(self, request, recipe_id):
+        favourite_entry = request.user.foodgram_favouritelist_users.filter(
+            recipe_id=recipe_id
         ).first()
         if favourite_entry:
             favourite_entry.delete()
@@ -129,4 +127,3 @@ class SubscriptionListViewSet(viewsets.ModelViewSet):
             {'errors': 'Этого пользователя нет в подписках!'},
             status=status.HTTP_400_BAD_REQUEST
         )
-

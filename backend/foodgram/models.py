@@ -181,10 +181,9 @@ class IngredientAmount(models.Model):
         return f'{self.recipe.name} - {self.ingredient} {self.amount}'
 
 
-class GeneralListBaseModel(CustomBaseModel):
+class GeneralListBaseModel(models.Model):
     """General model for shopping and favourite lists."""
 
-    name = None
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -197,9 +196,15 @@ class GeneralListBaseModel(CustomBaseModel):
         related_name='%(app_label)s_%(class)s_users',
         verbose_name='Пользователь'
     )
+    date_created = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+        db_index=True
+    )
 
     class Meta:
         abstract = True
+        ordering = ['-date_created']
         constraints = [
             models.UniqueConstraint(
                 fields=['content_type', 'object_id', 'user', 'recipe'], 

@@ -17,4 +17,7 @@ class AuthorAdminOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS or request.user.is_superuser:
             return True
-        return obj.author == request.user
+        if hasattr(obj, 'author'):
+            return obj.author == request.user
+        elif hasattr(obj, 'user'):
+            return obj.user == request.user

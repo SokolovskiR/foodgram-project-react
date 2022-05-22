@@ -320,13 +320,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         author = get_object_or_404(User, pk=kwargs.get('author_id'))
         user = self.context.get('request').user
         if user == author:
-            print('user is author same')
             raise serializers.ValidationError(
                 {'errors': 'Нельзя подписаться на себя!'}
             )     
         elif user.follower.filter(
             following=author).exists():
-            print('user is NOT author but already subscribed')
             raise serializers.ValidationError(
                 {'errors': 'Вы уже подписаны на этого пользователя!'},
             )
