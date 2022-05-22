@@ -1,10 +1,7 @@
 from import_export import resources
 
-from foodgram.models import (
-    Ingredient, FavouriteList, Subscription,
-    IngredientAmount, Recipe, Tag, ShoppingList,
-    User
-)
+from foodgram.models import (FavouriteList, Ingredient, IngredientAmount,
+                             Recipe, ShoppingList, Subscription, Tag)
 
 
 class SaveAuthorEditorResourceMixin:
@@ -25,7 +22,7 @@ class TagResource(resources.ModelResource):
 class IngredientResource(
     SaveAuthorEditorResourceMixin,
     resources.ModelResource
-    ):
+):
     """Resource to import/export ingredients via admin panel."""
 
     class Meta:
@@ -51,6 +48,7 @@ class IngredientAmountResource(resources.ModelResource):
 
     class Meta:
         model = IngredientAmount
+
 
 class ShoppingResource(resources.ModelResource):
     """Resource to import/export list via admin panel"""

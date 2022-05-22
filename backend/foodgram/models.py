@@ -1,7 +1,6 @@
-from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator, MinValueValidator
-
+from django.core.validators import MinValueValidator, RegexValidator
+from django.db import models
 
 MIN_ING_AMOUNT = 1
 MIN_COOK_TIME = 1
@@ -116,7 +115,7 @@ class Recipe(CustomBaseModel):
         verbose_name='Время приготовления в минутах',
         validators=[
             MinValueValidator(
-                MIN_COOK_TIME, 
+                MIN_COOK_TIME,
                 f'минимальное время приготовления {MIN_COOK_TIME} мин.'
             )
         ]
@@ -160,8 +159,9 @@ class IngredientAmount(models.Model):
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
         validators=[
-            MinValueValidator(MIN_ING_AMOUNT, 
-            f'укажите количество не менее {MIN_ING_AMOUNT}'
+            MinValueValidator(
+                MIN_ING_AMOUNT,
+                f'укажите количество не менее {MIN_ING_AMOUNT}'
             )
         ]
     )
@@ -181,10 +181,9 @@ class IngredientAmount(models.Model):
         return f'{self.recipe.name} - {self.ingredient} {self.amount}'
 
 
-class GeneralListBaseModel(CustomBaseModel):
+class GeneralListBaseModel(models.Model):
     """General model for shopping and favourite lists."""
 
-    name = None
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -197,12 +196,18 @@ class GeneralListBaseModel(CustomBaseModel):
         related_name='%(app_label)s_%(class)s_users',
         verbose_name='Пользователь'
     )
+    date_created = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+        db_index=True
+    )
 
     class Meta:
         abstract = True
+        ordering = ['-date_created']
         constraints = [
             models.UniqueConstraint(
-                fields=['content_type', 'object_id', 'user', 'recipe'], 
+                fields=['content_type', 'object_id', 'user', 'recipe'],
                 name='%(app_label)s_%(class)s_user_recipe_unique'
             ),
         ]
@@ -227,10 +232,9 @@ class ShoppingList(GeneralListBaseModel):
         verbose_name_plural = 'Списки покупок'
 
 
-class Subscription(CustomBaseModel):
+class Subscription(models.Model):
     """Subscriptions to authors of recipes."""
 
-    name = None
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -242,6 +246,11 @@ class Subscription(CustomBaseModel):
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Автор рецептов'
+    )
+    date_created = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+        db_index=True
     )
 
     class Meta:

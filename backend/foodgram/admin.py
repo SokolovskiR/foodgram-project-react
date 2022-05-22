@@ -1,15 +1,12 @@
 from django.contrib import admin
-
 from import_export.admin import ImportExportModelAdmin
-from .resources import (
-    IngredientAmountResource, IngredientResource, IngredientAmount,
-    RecipeResource, SubscriptionResource, FavouriteResource, TagResource,
-    ShoppingResource
-)
-from .models import (
-    Tag, Ingredient, IngredientAmount,
-    Recipe, FavouriteList, ShoppingList, Subscription
-)
+
+from .models import (FavouriteList, Ingredient, IngredientAmount, Recipe,
+                     ShoppingList, Subscription, Tag)
+from .resources import (FavouriteResource, IngredientAmountResource,
+                        IngredientResource, RecipeResource, ShoppingResource,
+                        SubscriptionResource, TagResource)
+
 
 class IngredientInLine(admin.StackedInline):
     """Inlines to add multiple ingredients to a recipe."""
@@ -32,7 +29,7 @@ class SaveAuthorEditorMixin:
             obj.author = request.user
             obj.last_editor = request.user
         super().save_model(request, obj, form, change)
-    
+
     def get_readonly_fields(self, request, obj=None):
         """
         Automatically save author and editor when creating instance,
@@ -55,7 +52,7 @@ class TagAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         'last_editor',
         'date_modified'
     )
-    search_fields = ('name','slug')
+    search_fields = ('name', 'slug')
 
 
 @admin.register(Ingredient)
@@ -105,10 +102,10 @@ class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('tags', 'ingredients')
-    
+
     def get_tags(self, obj):
         return ', '.join([str(t.name) for t in obj.tags.all()])
-    
+
     def get_favourite_add_count(self, obj):
         return FavouriteList.objects.filter(
             recipe_id=obj.id
@@ -128,9 +125,9 @@ class FavouriteListAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         'pk',
         'user',
         'recipe',
-        'date_modified'
+        'date_created'
     )
-    search_fields = ('author', 'recipe')
+    search_fields = ('user__username', 'recipe__name')
 
 
 @admin.register(ShoppingList)
@@ -147,7 +144,7 @@ class SubscriptionAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         'pk',
         'user',
         'following',
-        'date_modified'
+        'date_created'
     )
     search_fields = (
         'user__username', 'user__last_name',
