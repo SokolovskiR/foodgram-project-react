@@ -3,20 +3,20 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import action
-
+from django.http import HttpResponse
+from django.db.models import Sum
 
 from core.permissions import AuthorAdminOrReadOnly
 from foodgram.models import (
-    Tag, Ingredient, FavouriteList,
-    Recipe, Subscription
+    Tag, Ingredient,Recipe, Subscription,
+    IngredientAmount
 )
-
 from .fitlers import RecipeFilter, IngredientFilter
 from .serializers import (
-    CustomUserSerializer, RecipeCreateUpdateSerializer, TagSerializer,
-    IngredientSerializer, FavouriteListSerializer, SubscriptionSerializer,
-    RecipeViewSerializer
+    RecipeCreateUpdateSerializer, TagSerializer,
+    IngredientSerializer, FavouriteListSerializer, 
+    SubscriptionSerializer, RecipeViewSerializer,
+    ShoppingListSerializer
 )
 
 User = get_user_model()
@@ -110,7 +110,7 @@ class SubscriptionListViewSet(viewsets.ModelViewSet):
     """Viewset for subscription list."""
 
     serializer_class = SubscriptionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AuthorAdminOrReadOnly]
 
     def get_queryset(self):
         return self.request.user.follower.all()
@@ -125,5 +125,62 @@ class SubscriptionListViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(
             {'errors': 'Этого пользователя нет в подписках!'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+
+class ShoppingListViewSet(viewsets.ModelViewSet):
+    """Viewset for shopping list."""
+
+    serializer_class = ShoppingListSerializer
+    permission_classes = [AuthorAdminOrReadOnly, IsAuthenticated]
+
+    def get_queryset(self):
+        return self.request.user.foodgram_shoppinglist_users.all()
+    
+    def destroy(self, request, recipe_id):
+        shopping_entry = request.user.foodgram_shoppinglist_users.filter(
+            recipe_id=recipe_id
+        ).first()
+        if shopping_entry:
+            shopping_entry.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'errors': 'этого рецепта нет в списке покупок'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    def list(self, request, *args, **kwargs):
+        recipes = request.user.foodgram_shoppinglist_users.values('recipe')
+        ingredients = IngredientAmount.objects.filter(
+            recipe__in=recipes).values(
+                'ingredient__name', 'ingredient__measurement_unit'
+                ).annotate(amount_sum=Sum('amount'))
+        if ingredients:
+            shopping_list = [
+                (
+                    f'FOODGRAM список покупок '
+                    f'для пользователя {request.user.username}\n\n'
+                )
+            ]
+            for i, item in enumerate(ingredients, start=1):
+                shopping_list.append(
+                    (
+                        f'{i}. '
+                        f'{item["ingredient__name"]} '
+                        f'({item["ingredient__measurement_unit"]}) - '
+                        f'{item["amount_sum"]}\n'
+                    )
+                )
+            response = HttpResponse(
+                shopping_list, status=status.HTTP_200_OK,
+                content_type='text/plain'
+            )
+            response['Content-Disposition'] = (
+                'attachment; filename=my_shopping_list.txt'
+            )
+            return response
+        return Response(
+            {'errors': 'список покупок пуст'},
             status=status.HTTP_400_BAD_REQUEST
         )

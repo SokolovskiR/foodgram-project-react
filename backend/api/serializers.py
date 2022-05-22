@@ -251,15 +251,11 @@ class FavouriteListSerializer(serializers.ModelSerializer):
         fields = ('id',)
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
-        request = self.context.get('request')
-        recipe_id = request.parser_context.get('kwargs').get('recipe_id')
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        data['name'] = recipe.name
-        data['image'] = request.build_absolute_uri(recipe.image.url)
-        data['cooking_time'] = recipe.cooking_time
-        return data
-    
+        return RecipeReadOnlySerializer(
+            instance.recipe, context={
+                'request': self.context.get('request')
+            }).data
+
     def create(self, validated_data):
         recipe_id = self.context.get(
             'request'
@@ -269,6 +265,14 @@ class FavouriteListSerializer(serializers.ModelSerializer):
         validated_data['recipe'] = recipe
         validated_data['user'] = user
         return super().create(validated_data)
+
+
+class ShoppingListSerializer(FavouriteListSerializer):
+    """Serializer for shopping list."""
+
+    class Meta:
+        model = ShoppingList
+        fields = ('id',)
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
