@@ -133,3 +133,6 @@ dmypy.json
 
 # Django media folder for dev
 backend/media/
+
+# VS Code
+.vscode/
