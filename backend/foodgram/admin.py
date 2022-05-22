@@ -147,7 +147,7 @@ class SubscriptionAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         'pk',
         'user',
         'following',
-        'date_modified'
+        'date_created'
     )
     search_fields = (
         'user__username', 'user__last_name',

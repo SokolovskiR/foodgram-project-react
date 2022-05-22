@@ -227,10 +227,9 @@ class ShoppingList(GeneralListBaseModel):
         verbose_name_plural = 'Списки покупок'
 
 
-class Subscription(CustomBaseModel):
+class Subscription(models.Model):
     """Subscriptions to authors of recipes."""
 
-    name = None
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -242,6 +241,11 @@ class Subscription(CustomBaseModel):
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Автор рецептов'
+    )
+    date_created = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True,
+        db_index=True
     )
 
     class Meta:

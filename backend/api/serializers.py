@@ -274,15 +274,14 @@ class FavouriteListSerializer(serializers.ModelSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Serializer for subscribtions."""
 
-    id = serializers.ReadOnlyField(source='author.id')
-    email = serializers.ReadOnlyField(source='author.email')
-    username = serializers.ReadOnlyField(source='author.username')
-    first_name = serializers.ReadOnlyField(source='author.first_name')
-    last_name = serializers.ReadOnlyField(source='author.last_name')
+    id = serializers.ReadOnlyField(source='following.id')
+    email = serializers.ReadOnlyField(source='following.email')
+    username = serializers.ReadOnlyField(source='following.username')
+    first_name = serializers.ReadOnlyField(source='following.first_name')
+    last_name = serializers.ReadOnlyField(source='following.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Subscription
@@ -299,6 +298,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = request.user
         recipes_limit = request.query_params.get('recipes_limit')
+        try:
+            recipes_limit = int(recipes_limit)
+        except (TypeError, ValueError):
+            recipes_limit = None
         qs = user.foodgram_recipe_authors.all()
         if recipes_limit:
             qs = qs[:recipes_limit]
@@ -308,7 +311,24 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     
     def get_is_subscribed(self, obj):
         return Subscription.objects.filter(
-            user=obj.user, author=obj.author
-        ).exists()
+            user=obj.user,
+            following=obj.following
+            ).exists()
 
-    
+    def create(self, validated_data):
+        kwargs = self.context.get('request').parser_context.get('kwargs')
+        author = get_object_or_404(User, pk=kwargs.get('author_id'))
+        user = self.context.get('request').user
+        if user == author:
+            print('user is author same')
+            raise serializers.ValidationError(
+                {'errors': 'Нельзя подписаться на себя!'}
+            )     
+        elif user.follower.filter(
+            following=author).exists():
+            print('user is NOT author but already subscribed')
+            raise serializers.ValidationError(
+                {'errors': 'Вы уже подписаны на этого пользователя!'},
+            )
+        clean_data = {'user': user, 'following': author}
+        return super().create(clean_data)

@@ -2,18 +2,23 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+
 
 from core.permissions import AuthorAdminOrReadOnly
 from foodgram.models import (
     Tag, Ingredient, FavouriteList,
-    Recipe
+    Recipe, Subscription
 )
+
 from .fitlers import RecipeFilter, IngredientFilter
 from .serializers import (
-    RecipeCreateUpdateSerializer, TagSerializer, IngredientSerializer,
-    FavouriteListSerializer, SubscriptionSerializer,
+    CustomUserSerializer, RecipeCreateUpdateSerializer, TagSerializer,
+    IngredientSerializer, FavouriteListSerializer, SubscriptionSerializer,
     RecipeViewSerializer
 )
+
+User = get_user_model()
 
 
 class AutoAddAuthorEditorMixin:
@@ -103,21 +108,25 @@ class FavouriteListViewSet(
         return super().create(request, *args, **kwargs)
 
 
-class SubscriptionListViewSet(
-    AutoAddAuthorEditorMixin,
-    mixins.ListModelMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-    
-):
+class SubscriptionListViewSet(viewsets.ModelViewSet):
     """Viewset for subscription list."""
 
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated]
-    
 
     def get_queryset(self):
-        return self.request.user.following.all()
-
+        return self.request.user.follower.all()
     
+    def destroy(self, request, author_id):
+        author = get_object_or_404(User, pk=author_id)
+        subscription = Subscription.objects.filter(
+            following=author, user=request.user
+        ).first()
+        if subscription:
+            subscription.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'errors': 'Этого пользователя нет в подписках!'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+

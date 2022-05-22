@@ -21,11 +21,14 @@ router.register('recipes', RecipeViewSet, basename='recipes')
 
 
 urlpatterns = [
-    path('users/subscriptions/', SubscriptionListViewSet.as_view({'get': 'list'}), name='subscriptions'),
-    path(
-        'users/<int:author_id>/subscribe/',
-        SubscriptionListViewSet.as_view({'get': 'create', 'delete': 'destroy'}), name='subscribe'
-    ),
+    path('users/subscriptions/', SubscriptionListViewSet.as_view(
+        {'get': 'list'}
+        ), name='subscriptions'),
+    path('users/<int:author_id>/subscribe/',
+        SubscriptionListViewSet.as_view(
+            {'post': 'create', 'delete': 'destroy'}
+            ), name='subscribe'
+        ),
     path('', include('djoser.urls')),
     path('auth/token/login/', TokenCreateView.as_view(), name='token_obtain'),
     path('auth/token/logout/', TokenDestroyView.as_view(), name='token_destroy'),
