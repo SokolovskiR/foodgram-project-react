@@ -19,4 +19,4 @@ class CustomUserAdmin(UserAdmin):
     )
     list_editable = ('is_active', 'is_superuser')
     list_filter = ('is_active', 'is_superuser')
-    search_fields = ('username','email', 'last_name')
+    search_fields = ('username', 'email', 'last_name')

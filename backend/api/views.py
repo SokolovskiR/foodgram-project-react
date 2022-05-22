@@ -25,7 +25,7 @@ class AutoAddAuthorEditorMixin:
     def perform_create(self, serializer):
         user = self.request.user
         serializer.save(author=user, last_editor=user)
-    
+
     def perform_update(self, serializer):
         user = self.request.user
         serializer.save(last_editor=user)
@@ -62,7 +62,6 @@ class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
     permission_classes = [AuthorAdminOrReadOnly]
     queryset = Recipe.objects.all()
     filterset_class = RecipeFilter
-    
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -91,11 +90,11 @@ class FavouriteListViewSet(viewsets.ModelViewSet):
             {'errors': 'этого рецепта нет в избранном'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     def create(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, id=kwargs.get('recipe_id'))
         if request.user.foodgram_favouritelist_users.filter(
-            recipe=recipe).exists():
+                recipe=recipe).exists():
             return Response(
                 {'errors': 'Этот рецепт уже в списке избранного!'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -111,7 +110,7 @@ class SubscriptionListViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.request.user.follower.all()
-    
+
     def destroy(self, request, author_id):
         author = get_object_or_404(User, pk=author_id)
         subscription = Subscription.objects.filter(
@@ -134,7 +133,7 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.request.user.foodgram_shoppinglist_users.all()
-    
+
     def destroy(self, request, recipe_id):
         shopping_entry = request.user.foodgram_shoppinglist_users.filter(
             recipe_id=recipe_id
@@ -146,7 +145,7 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
             {'errors': 'этого рецепта нет в списке покупок'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
+
     def list(self, request, *args, **kwargs):
         recipes = request.user.foodgram_shoppinglist_users.values('recipe')
         ingredients = IngredientAmount.objects.filter(

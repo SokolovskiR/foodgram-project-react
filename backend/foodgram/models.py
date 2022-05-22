@@ -115,7 +115,7 @@ class Recipe(CustomBaseModel):
         verbose_name='Время приготовления в минутах',
         validators=[
             MinValueValidator(
-                MIN_COOK_TIME, 
+                MIN_COOK_TIME,
                 f'минимальное время приготовления {MIN_COOK_TIME} мин.'
             )
         ]
@@ -159,8 +159,9 @@ class IngredientAmount(models.Model):
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
         validators=[
-            MinValueValidator(MIN_ING_AMOUNT, 
-            f'укажите количество не менее {MIN_ING_AMOUNT}'
+            MinValueValidator(
+                MIN_ING_AMOUNT,
+                f'укажите количество не менее {MIN_ING_AMOUNT}'
             )
         ]
     )
@@ -206,7 +207,7 @@ class GeneralListBaseModel(models.Model):
         ordering = ['-date_created']
         constraints = [
             models.UniqueConstraint(
-                fields=['content_type', 'object_id', 'user', 'recipe'], 
+                fields=['content_type', 'object_id', 'user', 'recipe'],
                 name='%(app_label)s_%(class)s_user_recipe_unique'
             ),
         ]

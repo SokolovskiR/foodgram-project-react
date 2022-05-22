@@ -3,10 +3,9 @@ from import_export.admin import ImportExportModelAdmin
 
 from .models import (FavouriteList, Ingredient, IngredientAmount, Recipe,
                      ShoppingList, Subscription, Tag)
-from .resources import (FavouriteResource, IngredientAmount,
-                        IngredientAmountResource, IngredientResource,
-                        RecipeResource, ShoppingResource, SubscriptionResource,
-                        TagResource)
+from .resources import (FavouriteResource, IngredientAmountResource,
+                        IngredientResource, RecipeResource, ShoppingResource,
+                        SubscriptionResource, TagResource)
 
 
 class IngredientInLine(admin.StackedInline):
@@ -30,7 +29,7 @@ class SaveAuthorEditorMixin:
             obj.author = request.user
             obj.last_editor = request.user
         super().save_model(request, obj, form, change)
-    
+
     def get_readonly_fields(self, request, obj=None):
         """
         Automatically save author and editor when creating instance,
@@ -53,7 +52,7 @@ class TagAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         'last_editor',
         'date_modified'
     )
-    search_fields = ('name','slug')
+    search_fields = ('name', 'slug')
 
 
 @admin.register(Ingredient)
@@ -103,10 +102,10 @@ class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.prefetch_related('tags', 'ingredients')
-    
+
     def get_tags(self, obj):
         return ', '.join([str(t.name) for t in obj.tags.all()])
-    
+
     def get_favourite_add_count(self, obj):
         return FavouriteList.objects.filter(
             recipe_id=obj.id
