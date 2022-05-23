@@ -21,19 +21,19 @@ urlpatterns = [
             ), name='subscribe'
         ),
     path(
-        'recipes/<int:recipe_id>/favorite',
+        'recipes/<int:recipe_id>/favorite/',
         FavouriteListViewSet.as_view(
             {'post': 'create', 'delete': 'destroy'}
             ), name='favourite_list'
         ),
     path(
-        'recipes/<int:recipe_id>/shopping_cart',
+        'recipes/<int:recipe_id>/shopping_cart/',
         ShoppingListViewSet.as_view(
             {'post': 'create', 'delete': 'destroy'}
             ), name='shopping_cart'
         ),
     path(
-        'recipes/download_shopping_cart',
+        'recipes/download_shopping_cart/',
         ShoppingListViewSet.as_view(
             {'get': 'list'}
             ), name='shopping_cart'

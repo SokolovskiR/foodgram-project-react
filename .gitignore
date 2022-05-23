@@ -135,4 +135,4 @@ dmypy.json
 backend/media/
 
 # VS Code
-.vscode/settings.json
+.vscode/

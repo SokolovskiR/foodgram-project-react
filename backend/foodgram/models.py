@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
+
 MIN_ING_AMOUNT = 1
 MIN_COOK_TIME = 1
 MAX_NAME_LENGTH = 200
@@ -69,8 +70,7 @@ class Tag(CustomBaseModel):
         unique=True
     )
 
-    class Meta:
-        ordering = ['name']
+    class Meta(CustomBaseModel.Meta):
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
 
@@ -86,8 +86,7 @@ class Ingredient(CustomBaseModel):
         max_length=MAX_UNIT_LENGTH
     )
 
-    class Meta:
-        ordering = ['name']
+    class Meta(CustomBaseModel.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=['name', 'measurement_unit'],
@@ -123,17 +122,16 @@ class Recipe(CustomBaseModel):
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Теги',
-        related_name='recipe_tags'
+        related_name='recipes'
     )
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientAmount',
         verbose_name='Ингредиенты',
-        related_name='ingredients'
+        related_name='recipes'
     )
 
-    class Meta:
-        ordering = ['-date_modified']
+    class Meta(CustomBaseModel.Meta):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
@@ -147,7 +145,7 @@ class IngredientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredient_amount_recipes',
+        related_name='ingredient_amounts',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(
@@ -207,8 +205,8 @@ class GeneralListBaseModel(models.Model):
         ordering = ['-date_created']
         constraints = [
             models.UniqueConstraint(
-                fields=['content_type', 'object_id', 'user', 'recipe'],
-                name='%(app_label)s_%(class)s_user_recipe_unique'
+                fields=['user', 'recipe'],
+                name='%(app_label)s_%(class)s_unique'
             ),
         ]
 
@@ -219,7 +217,7 @@ class GeneralListBaseModel(models.Model):
 class FavouriteList(GeneralListBaseModel):
     """Recipes for favourite list."""
 
-    class Meta:
+    class Meta(GeneralListBaseModel.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
@@ -227,7 +225,7 @@ class FavouriteList(GeneralListBaseModel):
 class ShoppingList(GeneralListBaseModel):
     """Recipes for shopping list."""
 
-    class Meta:
+    class Meta(GeneralListBaseModel.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'
 
@@ -241,7 +239,7 @@ class Subscription(models.Model):
         related_name='follower',
         verbose_name='Подписчик'
     )
-    following = models.ForeignKey(
+    author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='following',
@@ -256,7 +254,7 @@ class Subscription(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'following'],
+                fields=['user', 'author'],
                 name='unique_following'
             )
         ]

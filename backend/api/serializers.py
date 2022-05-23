@@ -1,31 +1,10 @@
-import base64
-import uuid
-
-from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from .fields import Base64ImageField
 from foodgram.models import (FavouriteList, Ingredient, IngredientAmount,
                              Recipe, ShoppingList, Subscription, Tag)
 from users.models import User
-
-
-class Base64ImageField(serializers.ImageField):
-    """Custom field to convert Base64 string to file."""
-
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            id = uuid.uuid4()
-            data = ContentFile(
-                base64.b64decode(imgstr),
-                name=id.urn[9:] + '.' + ext
-            )
-        return super(Base64ImageField, self).to_internal_value(data)
-
-    def to_representation(self, value):
-        return self.context.get('request').build_absolute_uri(value.url)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -45,8 +24,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if user.is_anonymous:
             return False
         if Subscription.objects.filter(
-            following=obj, user=user
-        ).first():
+            author=obj, user=user
+        ).exists():
             return True
         return False
 
@@ -163,26 +142,34 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         )
 
     def validate_ingredients(self, data):
-        ingredients = self.initial_data.get('ingredients')
-        if not ingredients:
-            raise serializers.ValidationError('Нужен хотя бы один ингредиент')
-        for ingredient in ingredients:
+        if not data:
+            raise serializers.ValidationError(
+                'Нужен хотя бы один ингредиент.'
+            )
+        if len(data) != len(set([i['id'] for i in data])):
+            raise serializers.ValidationError(
+                'Ингредиенты должы быть уникальными.'
+            )
+        for ingredient in data:
             if ingredient['amount'] <= 0:
                 raise serializers.ValidationError(
-                    'Количество должно быть больше нуля'
+                    'Количество должно быть больше нуля.'
                 )
         return data
 
     def validate_tags(self, data):
-        tags = self.initial_data.get('tags')
-        if not tags:
-            raise serializers.ValidationError('Нужен хотя бы один тег')
+        if not data:
+            raise serializers.ValidationError('Нужен хотя бы один тег.')
+        if len(data) != len(set(data)):
+            raise serializers.ValidationError(
+                'Теги должны быть уникальными.'
+            )
         return data
 
     def validate_cooking_time(self, data):
         if not isinstance(data, int):
             raise serializers.ValidationError(
-                'Неверный формат, ожидается целое позитивное число'
+                'Неверный формат, ожидается целое позитивное число.'
             )
         if data <= 0:
             raise serializers.ValidationError(
@@ -209,20 +196,15 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return new_recipe
 
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
-        instance.image = validated_data.get('image', instance.image)
-        instance.last_editor = validated_data.get(
+        instance.last_editor = validated_data.pop(
             'last_editor', self.context['request'].user
         )
-        if 'tags' in self.initial_data:
-            tags_data = validated_data.pop('tags')
+        tags_data = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        super().update(instance, validated_data)
+        if tags_data:
             instance.tags.set(tags_data)
-        if 'ingredients' in self.initial_data:
-            ingredients = validated_data.pop('ingredients')
+        if ingredients:
             instance.ingredients.clear()
             self.add_ingredients(ingredients, instance)
         instance.save()
@@ -270,11 +252,11 @@ class ShoppingListSerializer(FavouriteListSerializer):
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Serializer for subscribtions."""
 
-    id = serializers.ReadOnlyField(source='following.id')
-    email = serializers.ReadOnlyField(source='following.email')
-    username = serializers.ReadOnlyField(source='following.username')
-    first_name = serializers.ReadOnlyField(source='following.first_name')
-    last_name = serializers.ReadOnlyField(source='following.last_name')
+    id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -308,21 +290,24 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         return Subscription.objects.filter(
             user=obj.user,
-            following=obj.following
+            author=obj.author
             ).exists()
 
-    def create(self, validated_data):
+    def get_user_and_author(self):
         kwargs = self.context.get('request').parser_context.get('kwargs')
         author = get_object_or_404(User, pk=kwargs.get('author_id'))
         user = self.context.get('request').user
+        return user, author
+
+    def validate(self, attrs):
+        user, author = self.get_user_and_author()
         if user == author:
             raise serializers.ValidationError(
                 {'errors': 'Нельзя подписаться на себя!'}
             )
         elif user.follower.filter(
-                following=author).exists():
+                author=author).exists():
             raise serializers.ValidationError(
                 {'errors': 'Вы уже подписаны на этого пользователя!'},
             )
-        clean_data = {'user': user, 'following': author}
-        return super().create(clean_data)
+        return {'user': user, 'author': author}

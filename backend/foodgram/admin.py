@@ -104,7 +104,7 @@ class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
         return qs.prefetch_related('tags', 'ingredients')
 
     def get_tags(self, obj):
-        return ', '.join([str(t.name) for t in obj.tags.all()])
+        return ', '.join(obj.tags.values_list('name', flat=True))
 
     def get_favourite_add_count(self, obj):
         return FavouriteList.objects.filter(
@@ -143,10 +143,10 @@ class SubscriptionAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     list_display = (
         'pk',
         'user',
-        'following',
+        'author',
         'date_created'
     )
     search_fields = (
         'user__username', 'user__last_name',
-        'following__username', 'following__last_name'
+        'author__username', 'author__last_name'
     )
