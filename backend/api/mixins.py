@@ -30,7 +30,6 @@ class DestroyMixin:
         lookup_field = self.lookup_field
         lookup_kwargs = {self.lookup_field: self.kwargs.get(lookup_field)}
         obj = qs.filter(**lookup_kwargs).first()
-        print(lookup_kwargs)
         if not obj:
             return Response(
                 {'errors': 'этого объекта нет в списке'},

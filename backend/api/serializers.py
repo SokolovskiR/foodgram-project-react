@@ -23,11 +23,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        if Subscription.objects.filter(
+        return Subscription.objects.filter(
             author=obj, user=user
-        ).exists():
-            return True
-        return False
+        ).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -207,7 +205,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         if ingredients:
             instance.ingredients.clear()
             self.add_ingredients(ingredients, instance)
-        instance.save()
         return instance
 
     def to_representation(self, instance):
