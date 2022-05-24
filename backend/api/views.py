@@ -7,15 +7,15 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from core.permissions import AuthorAdminOrReadOnly
-from foodgram.models import (Ingredient, IngredientAmount, Recipe, Tag)
+from foodgram.models import Ingredient, IngredientAmount, Recipe, Tag
+
 from .fitlers import IngredientFilter, RecipeFilter
-from .mixins import AutoAddAuthorEditorMixin, ListRetrieveMixin, DestroyMixin
+from .mixins import AutoAddAuthorEditorMixin, DestroyMixin, ListRetrieveMixin
 from .serializers import (FavouriteListSerializer, IngredientSerializer,
                           RecipeCreateUpdateSerializer, RecipeViewSerializer,
                           ShoppingListSerializer, SubscriptionSerializer,
                           TagSerializer)
 from .utils import generate_shopping_list
-
 
 User = get_user_model()
 

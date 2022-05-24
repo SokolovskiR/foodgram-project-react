@@ -43,6 +43,7 @@ class SaveAuthorEditorMixin:
 @admin.register(Tag)
 class TagAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Tags administration."""
+
     resource_class = TagResource
     list_display = (
         'pk',
@@ -58,6 +59,7 @@ class TagAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Ingredients administration."""
+
     resource_class = IngredientResource
     list_display = (
         'pk',
@@ -71,6 +73,7 @@ class IngredientAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
 @admin.register(IngredientAmount)
 class IngredientAmountAdmin(ImportExportModelAdmin):
     """IngredientAmounts administration."""
+
     resource_class = IngredientAmountResource
     list_display = (
         'pk',
@@ -84,6 +87,7 @@ class IngredientAmountAdmin(ImportExportModelAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Recipes administration."""
+
     resource_class = RecipeResource
     list_display = (
         'pk',
@@ -109,7 +113,7 @@ class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     def get_favourite_add_count(self, obj):
         return FavouriteList.objects.filter(
             recipe_id=obj.id
-            ).count()
+        ).count()
 
     get_tags.short_description = 'Теги'
     get_favourite_add_count.short_description = (
@@ -120,6 +124,7 @@ class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
 @admin.register(FavouriteList)
 class FavouriteListAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Favourite recipes list administration."""
+
     resource_class = FavouriteResource
     list_display = (
         'pk',
@@ -133,12 +138,14 @@ class FavouriteListAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
 @admin.register(ShoppingList)
 class ShoppingListAdmin(FavouriteListAdmin):
     """Shopping list administration."""
+
     resource_class = ShoppingResource
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
     """Subscriptions administration."""
+
     resource_class = SubscriptionResource
     list_display = (
         'pk',

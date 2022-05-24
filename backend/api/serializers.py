@@ -1,10 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from .fields import Base64ImageField
 from foodgram.models import (FavouriteList, Ingredient, IngredientAmount,
                              Recipe, ShoppingList, Subscription, Tag)
 from users.models import User
+
+from .fields import Base64ImageField
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
