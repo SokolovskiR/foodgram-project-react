@@ -5,7 +5,6 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    container_name: foodgram-frontend
     volumes:
       - ../frontend/:/app/result_build/
   db:
@@ -28,7 +27,6 @@ services:
       - ./.env
   nginx:
     image: nginx:1.19.3
-    container_name: nginx
     ports:
       - "80:80"
     volumes:
@@ -40,6 +38,7 @@ services:
       - media_value:/var/html/media/
     depends_on:
       - backend
+      - frontend
 
 volumes:
   static_value:

@@ -19,7 +19,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
           cd backend/
-      - name: Test for PEP8 compliance with flake8 and pytest for Django
+      - name: Test for PEP8 compliance with flake8
         run: |
           python -m flake8
 
@@ -42,7 +42,7 @@ jobs:
     - name: Copy infra files to project directory
       uses: garygrossgarten/github-action-scp@release
       with:
-          local: .
+          local: infra/
           remote: /home/${{ secrets.USER }}/foodgram/
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
@@ -71,6 +71,12 @@ jobs:
             context: ./backend/
             tags: 904863016213768723/foodgram_backend:latest
             push: true
+        - name: Push frontend to Docker Hub
+          uses: docker/build-push-action@v2 
+          with:
+            context: ./frontend/
+            tags: 904863016213768723/foodgram_frontend:latest
+            push: true
 
   deploy:
     if: github.ref == 'refs/heads/master'
@@ -87,7 +93,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          cd foodgram/infra/
+          cd foodgram/
           rm -rf .env || true
           touch .env
           echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
@@ -99,7 +105,7 @@ jobs:
           echo DB_PORT=${{ secrets.DB_PORT }} >> .env
 
           sudo docker-compose stop
-          sudo docker-compose rm foodgram-backend
+          sudo docker-compose rm -f foodgram-backend
           sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
           sudo docker-compose up -d --build
 
