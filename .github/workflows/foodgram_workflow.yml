@@ -42,7 +42,7 @@ jobs:
     - name: Copy infra files to project directory
       uses: garygrossgarten/github-action-scp@release
       with:
-          local: infra/
+          local: .
           remote: /home/${{ secrets.USER }}/foodgram/
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
@@ -71,12 +71,6 @@ jobs:
             context: ./backend/
             tags: 904863016213768723/foodgram_backend:latest
             push: true
-        - name: Push frontend to Docker Hub
-          uses: docker/build-push-action@v2 
-          with:
-            context: ./frontend/
-            tags: 904863016213768723/foodgram_frontend:latest
-            push: true
 
   deploy:
     if: github.ref == 'refs/heads/master'
@@ -93,7 +87,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          cd foodgram/
+          cd foodgram/infra/
           rm -rf .env || true
           touch .env
           echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
@@ -106,12 +100,8 @@ jobs:
 
           sudo docker-compose stop
           sudo docker-compose rm foodgram-backend
-          sudo docker-compose rm foodgram-frontend
-          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
           sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
-          sudo docker-compose up -d
+          sudo docker-compose up -d --build
 
           sudo docker-compose exec -T backend python manage.py makemigrations
           sudo docker-compose exec -T backend python manage.py migrate --noinput

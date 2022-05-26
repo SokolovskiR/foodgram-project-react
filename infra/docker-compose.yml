@@ -2,10 +2,12 @@ version: '3.3'
 
 services:
   frontend:
-    image: 904863016213768723/foodgram_frontend:latest
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     container_name: foodgram-frontend
     volumes:
-      - ./frontend/:/app/result_build/
+      - ../frontend/:/app/result_build/
   db:
     image: postgres:13.0-alpine
     container_name: foodgram-db
@@ -26,6 +28,7 @@ services:
       - ./.env
   nginx:
     image: nginx:1.19.3
+    container_name: nginx
     ports:
       - "80:80"
     volumes:
