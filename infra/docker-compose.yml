@@ -14,7 +14,7 @@ services:
     env_file:
       - ./.env
   backend:
-    iamge: 904863016213768723/foodgram:latest
+    image: 904863016213768723/foodgram:latest
     restart: always
     volumes:
       - static_value:/app/static/
