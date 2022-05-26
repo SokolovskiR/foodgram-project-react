@@ -69,7 +69,7 @@ jobs:
           sudo docker pull 904863016213768723/foodgram_frontend:latest
           sudo docker-compose stop
           sudo docker-compose rm backend
-          rm .env
+          rm -rf .env || true
           touch .env
           echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
