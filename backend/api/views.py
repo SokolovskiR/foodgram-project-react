@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
 from core.permissions import AuthorAdminOrReadOnly
 from foodgram.models import Ingredient, IngredientAmount, Recipe, Tag
 
@@ -98,7 +97,7 @@ class ShoppingListViewSet(DestroyMixin, viewsets.ModelViewSet):
         ingredients = IngredientAmount.objects.filter(
             recipe__in=recipes).values(
                 'ingredient__name', 'ingredient__measurement_unit'
-                ).annotate(amount_sum=Sum('amount'))
+        ).annotate(amount_sum=Sum('amount'))
         if not ingredients:
             return Response(
                 {'errors': 'список покупок пуст'},

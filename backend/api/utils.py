@@ -1,4 +1,4 @@
-from core.exceptions import InvalidShoppingListData
+from core.exceptions import InvalidShoppingListDataError
 
 
 def generate_shopping_list(ingredients: list, username: str) -> list:
@@ -21,4 +21,4 @@ def generate_shopping_list(ingredients: list, username: str) -> list:
             )
         return shopping_list
     except Exception as e:
-        raise InvalidShoppingListData(e)
+        raise InvalidShoppingListDataError(e)

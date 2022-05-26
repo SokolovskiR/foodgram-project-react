@@ -1,5 +1,4 @@
 from import_export import resources
-
 from foodgram.models import (FavouriteList, Ingredient, IngredientAmount,
                              Recipe, ShoppingList, Subscription, Tag)
 

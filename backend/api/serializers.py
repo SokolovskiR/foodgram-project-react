@@ -1,10 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-
 from foodgram.models import (FavouriteList, Ingredient, IngredientAmount,
                              Recipe, ShoppingList, Subscription, Tag)
 from users.models import User
-
 from .fields import Base64ImageField
 
 
@@ -100,7 +98,7 @@ class RecipeViewSerializer(serializers.ModelSerializer):
             return False
         return FavouriteList.objects.filter(
             user=user, recipe_id=obj.id
-            ).exists()
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
@@ -108,7 +106,7 @@ class RecipeViewSerializer(serializers.ModelSerializer):
             return False
         return ShoppingList.objects.filter(
             user=user, recipe_id=obj.id
-            ).exists()
+        ).exists()
 
 
 class IngredientAddToRecipeSerializer(serializers.ModelSerializer):
@@ -183,7 +181,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
                 recipe=recipe,
                 ingredient=ing_id,
                 amount=ing.get('amount')
-                )
+            )
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
@@ -283,13 +281,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             qs = qs[:recipes_limit]
         return RecipeReadOnlySerializer(
             qs, many=True, context=self.context
-            ).data
+        ).data
 
     def get_is_subscribed(self, obj):
         return Subscription.objects.filter(
             user=obj.user,
             author=obj.author
-            ).exists()
+        ).exists()
 
     def get_user_and_author(self):
         kwargs = self.context.get('request').parser_context.get('kwargs')
