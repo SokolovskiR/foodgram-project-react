@@ -1,4 +1,4 @@
-# "Foodgram project" - [http://romkas-foodgram.hopto.org/api/](http://romkas-foodgram.hopto.org/api/)
+# "Foodgram project" - [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
 
 ![Foodgram workflow status](https://github.com/SokolovskiR/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
