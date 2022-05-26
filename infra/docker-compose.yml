@@ -2,8 +2,7 @@ version: '3.3'
 
 services:
   frontend:
-    build:
-      image: 904863016213768723/foodgram_frontend:latest
+    image: 904863016213768723/foodgram_frontend:latest
     volumes:
       - ./frontend/:/app/result_build/
   db:

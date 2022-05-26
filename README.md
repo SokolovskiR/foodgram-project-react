@@ -1,4 +1,6 @@
-# "Foodgram project" - [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
+# "Foodgram project" 
+
+# Public deployment: [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
 
 ![Foodgram workflow status](https://github.com/SokolovskiR/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
@@ -24,7 +26,7 @@ git clone https://github.com/SokolovskiR/foodgram-project-react
 ```
 - run once inside *infra* folder to build the frontend
 ```
-python3 m -venv venv
+docker-compose up -d
 ``` 
 - create a virtual environment inside *backend* folder
 ```
@@ -52,12 +54,10 @@ python3 manage.py createsuperuser
 python3 manage.py runserver
 ```
 
-## Public Deployment
+## API documentation
 
-You can check the website by visiting: [http://romkas-foodgram.hopto.org](http://romkas-foodgram.hopto.org)
+[http://romkas-foodgram.hopto.org/api/docs/](http://romkas-foodgram.hopto.org/api/docs/)
 
-
-API Documentation: [http://romkas-foodgram.hopto.org/api/docs/](http://romkas-foodgram.hopto.org/api/docs/)
 
 ### Author
 Roman Sokolovski
