@@ -93,8 +93,7 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          sudo docker-compose stop
-          sudo docker-compose rm backend
+          cd foodgram/
           rm -rf .env || true
           touch .env
           echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
@@ -104,7 +103,13 @@ jobs:
           echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
           echo DB_HOST=${{ secrets.DB_HOST }} >> .env
           echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-          sudo docker-compose up -d --build
+
+          sudo docker-compose stop
+          sudo docker-compose rm foodgram_frontend_1
+          sudo docker-compose rm foodgram_backend_1
+          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
+          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
+          sudo docker-compose up -d
   
   send_message:
     runs-on: ubuntu-latest
