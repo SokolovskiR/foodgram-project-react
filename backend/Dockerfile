@@ -4,5 +4,4 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 COPY . /app/
 RUN pip3 install -r requirements.txt --no-cache-dir
-ADD django-entrypoint.sh /app/
 ENTRYPOINT ["django-entrypoint.sh"] 
