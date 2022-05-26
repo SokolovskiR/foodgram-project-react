@@ -1,5 +1,4 @@
 from django_filters import FilterSet, filters
-
 from foodgram.models import Ingredient, Recipe
 
 
