@@ -12,6 +12,8 @@ This is a web application where users can share their favourite recipes, subscri
 * Backend: Django 3.2.13 with Django REST framework 3.13.1
 * Database: PostgreSQL
 * Frontend: React
+* Web server, reverse proxy: Nginx
+* WSGI server: gunicorn
 
 
 ## How to run the project in dev-mode
