@@ -19,13 +19,6 @@ services:
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
-    command: >
-      bash -c "echo migrations..."
-      bash -c "python manage.py migrate"
-      bash -c "echo collect static..."
-      bash -c "python manage.py collectstatic --noinput"
-      bash -c "echo starting gunicorn..."
-      bash -c "gunicorn --bind 0:8000 foodgram_app.wsgi"
     depends_on:
       - db
     env_file:
