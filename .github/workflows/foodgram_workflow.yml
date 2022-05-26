@@ -65,8 +65,6 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
-          sudo docker pull 904863016213768723/foodgram_backend:latest
-          sudo docker pull 904863016213768723/foodgram_frontend:latest
           sudo docker-compose stop
           sudo docker-compose rm backend
           rm -rf .env || true
