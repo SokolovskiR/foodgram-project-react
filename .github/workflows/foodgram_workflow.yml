@@ -106,8 +106,10 @@ jobs:
 
           sudo docker-compose stop
           sudo docker-compose rm -f foodgram-backend
-          sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
-          sudo docker-compose up -d --build
+          sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
+          sudo docker-compose up -d
 
           sudo docker-compose exec -T backend python manage.py makemigrations
           sudo docker-compose exec -T backend python manage.py migrate --noinput
