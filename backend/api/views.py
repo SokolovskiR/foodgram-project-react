@@ -25,6 +25,7 @@ class TagViewSet(ListRetrieveMixin):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
     permission_classes = [AllowAny]
+    pagination_class = None
 
 
 class IngredientViewSet(ListRetrieveMixin):
@@ -34,6 +35,7 @@ class IngredientViewSet(ListRetrieveMixin):
     queryset = Ingredient.objects.all()
     permission_classes = [AllowAny]
     filterset_class = IngredientFilter
+    pagination_class = None
 
 
 class RecipeViewSet(AutoAddAuthorEditorMixin, viewsets.ModelViewSet):
