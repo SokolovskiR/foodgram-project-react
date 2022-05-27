@@ -2,8 +2,6 @@
 
 # Public deployment: [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
 
-![Foodgram workflow status](https://github.com/SokolovskiR/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
-
 **Test users**
 
 *admin*
@@ -13,6 +11,9 @@ password: R3iTTgmerGY4jVCs
 *normal user*
 email: hopper@mail.com
 password: HZ7@5XoRU9r%bz2xZT
+
+![Foodgram workflow status](https://github.com/SokolovskiR/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
+
 
 ## Description
 
