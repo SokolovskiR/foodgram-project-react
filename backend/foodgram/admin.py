@@ -122,7 +122,7 @@ class RecipeAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
 
 
 @admin.register(FavouriteList)
-class FavouriteListAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
+class FavouriteListAdmin(ImportExportModelAdmin):
     """Favourite recipes list administration."""
 
     resource_class = FavouriteResource
@@ -143,7 +143,7 @@ class ShoppingListAdmin(FavouriteListAdmin):
 
 
 @admin.register(Subscription)
-class SubscriptionAdmin(SaveAuthorEditorMixin, ImportExportModelAdmin):
+class SubscriptionAdmin(ImportExportModelAdmin):
     """Subscriptions administration."""
 
     resource_class = SubscriptionResource

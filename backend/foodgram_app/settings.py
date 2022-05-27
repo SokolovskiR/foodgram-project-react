@@ -7,7 +7,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'not_so_secret_123')
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['84.252.137.62', 'romkas-foodgram.hopto.org', 'localhost']
+ALLOWED_HOSTS = [
+    '84.252.137.62', 'romkas-foodgram.hopto.org',
+    'localhost', '127.0.0.1'
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -63,8 +66,8 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', 'foodgram'),
         'USER': os.getenv('POSTGRES_USER', 'foodgram'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'foodgram'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', 5432)
+        'HOST': os.getenv('DB_HOST', '192.168.0.105'),
+        'PORT': os.getenv('DB_PORT', 5433)
     }
 }
 
