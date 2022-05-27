@@ -8,6 +8,8 @@
 
 This is a web application where users can share their favourite recipes, subscribe to other users, automatically generate shopping lists from ingredients.
 
+![Screenshot](foodgram_screenshot.png)
+
 ## Technology
 
 * Programming language: Python 3.8.10
