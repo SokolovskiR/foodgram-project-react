@@ -110,9 +110,9 @@ class ShoppingListViewSet(DestroyMixin, viewsets.ModelViewSet):
         )
         response = HttpResponse(
             shopping_list, status=status.HTTP_200_OK,
-            content_type='text/plain'
+            content_type='text/csv'
         )
         response['Content-Disposition'] = (
-            'attachment; filename=my_shopping_list.txt'
+            'attachment; filename=my_shopping_list.csv'
         )
         return response

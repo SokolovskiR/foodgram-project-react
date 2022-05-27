@@ -4,6 +4,16 @@
 
 ![Foodgram workflow status](https://github.com/SokolovskiR/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
+**Test users**
+
+*admin*
+email: admin@foodgram.com
+password: R3iTTgmerGY4jVCs
+
+*normal user*
+email: hopper@mail.com
+password: HZ7@5XoRU9r%bz2xZT
+
 ## Description
 
 This is a web application where users can share their favourite recipes, subscribe to other users, automatically generate shopping lists from ingredients.
