@@ -267,17 +267,17 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes_count(self, obj):
-        return self.context['request'].user.foodgram_recipe_authors.count()
+        return obj.author.foodgram_recipe_authors.count()
 
     def get_recipes(self, obj):
-        request = self.context.get('request')
-        user = request.user
-        recipes_limit = request.query_params.get('recipes_limit')
+        recipes_limit = self.context.get(
+            'request'
+        ).query_params.get('recipes_limit')
         try:
             recipes_limit = int(recipes_limit)
         except (TypeError, ValueError):
             recipes_limit = None
-        qs = user.foodgram_recipe_authors.all()
+        qs = obj.author.foodgram_recipe_authors.all()
         if recipes_limit:
             qs = qs[:recipes_limit]
         return RecipeReadOnlySerializer(

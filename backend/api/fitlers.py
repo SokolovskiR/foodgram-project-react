@@ -29,14 +29,14 @@ class RecipeFilter(FilterSet):
 
     def get_is_favorited(self, queryset, name, value):
         if value and not self.request.user.is_anonymous:
-            return Recipe.objects.filter(
+            return queryset.filter(
                 foodgram_favouritelist_recipes__user=self.request.user
             )
-        return Recipe.objects.all()
+        return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
         if value and not self.request.user.is_anonymous:
-            return Recipe.objects.filter(
-                foodgram_shoppinglist_recipes__user=self.request.user
+            return queryset.filter(
+                foodgram_favouritelist_recipes__user=self.request.user
             )
-        return Recipe.objects.all()
+        return queryset

@@ -265,5 +265,5 @@ class Subscription(models.Model):
         return (
             f'{self.date_created} '
             f'- {self.user.username} '
-            f'подписался на {self.following.username}'
+            f'подписался на {self.author.username}'
         )
