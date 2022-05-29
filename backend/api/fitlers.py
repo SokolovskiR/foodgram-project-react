@@ -16,11 +16,9 @@ class RecipeFilter(FilterSet):
     """Filters for recipe view."""
 
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
-    is_favorited = filters.NumberFilter(
-        method='get_is_favorited', label='в списке избранного',
-    )
+    is_favorited = filters.NumberFilter(method='get_is_favorited')
     is_in_shopping_cart = filters.NumberFilter(
-        method='get_is_in_shopping_cart', label='в списке покупок'
+        method='get_is_in_shopping_cart'
     )
 
     class Meta:
@@ -28,15 +26,17 @@ class RecipeFilter(FilterSet):
         fields = ['author', 'tags', 'is_favorited', 'is_in_shopping_cart']
 
     def get_is_favorited(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
+        if not value or value is None:
+            return queryset
+        if bool(value) and not self.request.user.is_anonymous:
             return queryset.filter(
                 foodgram_favouritelist_recipes__user=self.request.user
             )
-        return queryset
 
     def get_is_in_shopping_cart(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
+        if not value or value is None:
+            return queryset
+        if bool(value) and not self.request.user.is_anonymous:
             return queryset.filter(
-                foodgram_favouritelist_recipes__user=self.request.user
+                foodgram_shoppinglist_recipes__user=self.request.user
             )
-        return queryset
