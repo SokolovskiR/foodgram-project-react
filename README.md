@@ -1,17 +1,5 @@
 # "Foodgram project" 
 
-# Public deployment: [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
-
-**Test users**
-
-*admin*
-email: admin@foodgram.com
-password: R3iTTgmerGY4jVCs
-
-*normal user*
-email: hopper@mail.com
-password: HZ7@5XoRU9r%bz2xZT
-
 ![Foodgram workflow status](https://github.com/SokolovskiR/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)
 
 
@@ -67,10 +55,11 @@ python3 manage.py createsuperuser
 python3 manage.py runserver
 ```
 
-## API documentation
+## Public deployment
 
-[http://romkas-foodgram.hopto.org/api/docs/](http://romkas-foodgram.hopto.org/api/docs/)
+You can check the app by visiting: [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
 
+You can simply create a user and add some recipes to check all the functionalities.
 
 ### Author
 Roman Sokolovski
