@@ -55,11 +55,5 @@ python3 manage.py createsuperuser
 python3 manage.py runserver
 ```
 
-## Public deployment
-
-You can check the app by visiting: [http://romkas-foodgram.hopto.org/](http://romkas-foodgram.hopto.org/)
-
-You can simply create a user and add some recipes to check all the functionalities.
-
 ### Author
 Roman Sokolovski
